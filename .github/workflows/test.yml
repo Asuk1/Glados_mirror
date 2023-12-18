@@ -20,15 +20,9 @@ jobs:
 
       - name: Build project
         run: |
-          stack build
-          stack install
-          mv .stack-work/install/x86_64-linux-tinfo6/lts-17.5/8.10.4/bin/glados-exe glados
-
-      - name: Upload project
-        uses: actions/upload-artifact@v2
-        with:
-          name: glados
-          path: glados
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build install
+          mv build/glados-exe glados
 
   mirror:
     name: Mirorring
