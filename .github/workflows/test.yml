@@ -3,6 +3,9 @@ name: Build and Mirror
 on:
   push:
 
+env:
+  MIRROR_URL: "git@github.com:EpitechPromo2026/B-FUN-500-PAR-5-2-glados-evan.labourdette.git"
+
 jobs:
   build:
     runs-on: ubuntu-latest
