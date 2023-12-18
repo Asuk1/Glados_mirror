@@ -1,0 +1,48 @@
+name: Build and Mirror
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Haskell
+        uses: actions/setup-haskell@v1
+        with:
+          ghc-version: 8.10.4
+          cabal-version: 3.4.0.0
+          stack-version: 2.7.3
+
+      - name: Build project
+        run: |
+          stack build
+          stack install
+          mv .stack-work/install/x86_64-linux-tinfo6/lts-17.5/8.10.4/bin/glados-exe glados
+
+      - name: Upload project
+        uses: actions/upload-artifact@v2
+        with:
+          name: glados
+          path: glados
+
+  mirror:
+    push_to_mirror:
+        name: Mirorring
+        runs-on: ubuntu-latest
+        steps:
+          - name: Check repository
+            uses: actions/checkout@v2
+            with:
+                fetch-depth: 0
+          - name: Check mirorring
+            uses: pixta-dev/repository-mirroring-action@v1
+            with:
+                target_repo_url:
+                    ${{ env.MIRROR_URL }}
+                ssh_private_key:
+                    ${{ secrets.GIT_SSH_PRIVATE_KEY }}
