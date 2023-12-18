@@ -1,21 +1,45 @@
-name: Functional tests
+name: Build and Mirror
 
-on: [push, pull_request]
+on:
+  push:
+
+env:
+  MIRROR_URL: "git@github.com:EpitechPromo2026/B-FUN-500-PAR-5-2-glados-evan.labourdette.git"
 
 jobs:
-  functional-tests:
-    runs-on: ubuntu-20.04
-    container:
-      image: haskell:latest
+  build:
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
+      - name: Setup Haskell
+        uses: actions/setup-haskell@v1
+        with:
+          ghc-version: 8.10.3
+          cabal-version: 3.4.0.0
+          stack-version: 2.7.3
 
       - name: Build project
         run: |
+          cd Glados
           stack build --install-ghc --allow-different-user
           stack --local-bin-path build install
           mv build/glados-exe glados
+
+  mirror:
+    name: Mirorring
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
+      - name: Check mirorring
+        uses: pixta-dev/repository-mirroring-action@v1
+        with:
+            target_repo_url:
+                ${{ env.MIRROR_URL }}
+            ssh_private_key:
+                ${{ secrets.GIT_SSH_PRIVATE_KEY }}
