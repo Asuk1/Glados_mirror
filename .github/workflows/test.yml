@@ -26,10 +26,15 @@ jobs:
           cd Glados
           stack build --install-ghc --allow-different-user
           stack --local-bin-path build install
-          mv build/glados-exe glados
+
+      - name: Build Clean
+        run: |
+          cd Glados
+          stack clean
 
   mirror:
     name: Mirorring
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
