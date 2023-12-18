@@ -1,6 +1,6 @@
 ##
 ## EPITECH PROJECT, 2023
-## Makefile
+## GlaDos
 ## File description:
 ## Makefile
 ##
