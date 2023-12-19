@@ -73,7 +73,7 @@ testSubFunction = do
             sub [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value (-7))
     describe "Subtraction with errors" $ do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
-            sub [AstBoolean "true", AstInteger 4] [] `shouldBe`z (Err "Error: Subtract requires two integer values.")
+            sub [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Subtract requires two integer values.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
             sub [AstSymbol "x", AstInteger 4] [] `shouldBe` (Err "Error in 'a': Symbol 'x' not found in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
@@ -88,10 +88,85 @@ testSubFunction = do
             sub [] [] `shouldBe` (Err "Error in sub: Insufficient arguments")
 
 
+testMultFunction :: Spec
+testMultFunction = do
+    describe "Multiplication with valid integer" $ do
+        it "should multiply two positive integers" $ do
+            mult [AstInteger 3, AstInteger 4] [] `shouldBe` (Value 12)
+        it "should multiply two negative integers" $ do
+            mult [AstInteger (-3), AstInteger (-4)] [] `shouldBe` (Value 12)
+        it "should multiply one positive integer and one negative integer" $ do
+            mult [AstInteger 3, AstInteger (-4)] [] `shouldBe` (Value (-12))
+        it "should multiply one negative integer and one positive integer" $ do
+            mult [AstInteger (-3), AstInteger 4] [] `shouldBe` (Value (-12))
+    describe "Multiplication with valid symbol" $ do
+        it "should multiply two positive integers" $ do
+            let env = [("x", AstInteger 3), ("y", AstInteger 4)]
+            mult [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 12)
+        it "should multiply two negative integers" $ do
+            let env = [("x", AstInteger (-3)), ("y", AstInteger (-4))]
+            mult [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 12)
+        it "should multiply one positive integer and one negative integer" $ do
+            let env = [("x", AstInteger 3), ("y", AstInteger (-4))]
+            mult [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value (-12))
+        it "should multiply one negative integer and one positive integer" $ do
+            let env = [("x", AstInteger (-3)), ("y", AstInteger 4)]
+            mult [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value (-12))
+    describe "Multiplication with errors" $ do
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            mult [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Multiplication requires two integer values.")
+        it "should return an error if 'b' is not a valid integer or symbol" $ do
+            mult [AstSymbol "x", AstInteger 4] [] `shouldBe` (Err "Error in 'a': Symbol 'x' not found in the environment.")
+        it "should return an error if 'a' is an integer and 'b' is not" $ do
+            mult [AstInteger 3, AstSymbol "y"] [] `shouldBe` (Err "Error in 'b': Symbol 'y' not found in the environment.")
+        it "should return an error if 'b' is an integer and 'a' is not" $ do
+            let env = [("x", AstInteger 3)]
+            mult [AstSymbol "x", AstBoolean "false"] env `shouldBe` (Err "Error: Multiplication requires two integer values.")
+        it "should return an error if both 'a' and 'b' are not valid integers or symbols" $ do
+            mult [AstBoolean "true", AstBoolean "false"] [] `shouldBe` (Err "Error: Multiplication requires two integer values.")
+        it "should return an error if there are insufficient arguments" $ do
+            mult [AstInteger 3] [] `shouldBe` (Err "Error in mult: Insufficient arguments")
+            mult [] [] `shouldBe` (Err "Error in mult: Insufficient arguments")
+
+testInferiorFunction :: Spec
+testInferiorFunction = do
+    describe "Comparison with valid integer values" $ do
+        it "should return Bool \"#t\" if 'a' is less than 'b'" $ do
+            inferior [AstInteger 3, AstInteger 4] [] `shouldBe` (Bool "#t")
+        it "should return Bool \"#f\" if 'a' is greater than 'b'" $ do
+            inferior [AstInteger 5, AstInteger 4] [] `shouldBe` (Bool "#f")
+        it "should return Bool \"#f\" if 'a' is equal to 'b'" $ do
+            inferior [AstInteger 4, AstInteger 4] [] `shouldBe` (Bool "#f")
+    describe "Comparison with valid symbol values" $ do
+        it "should return Bool \"#t\" if symbol 'x' is less than symbol 'y'" $ do
+            let env = [("x", AstInteger 3), ("y", AstInteger 4)]
+            inferior [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool "#t")
+        it "should return Bool \"#f\" if symbol 'x' is greater than symbol 'y'" $ do
+            let env = [("x", AstInteger 5), ("y", AstInteger 4)]
+            inferior [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool "#f")
+        it "should return Bool \"#f\" if symbol 'x' is equal to symbol 'y'" $ do
+            let env = [("x", AstInteger 4), ("y", AstInteger 4)]
+            inferior [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool "#f")
+    describe "Comparison with errors" $ do
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            inferior [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Comparison requires two integer values.")
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            inferior [AstSymbol "x", AstBoolean "false"] [] `shouldBe` (Err "Error in 'a': Symbol 'x' not found in the environment.")
+        it "should return an error if 'b' is not a valid integer or symbol" $ do
+            inferior [AstBoolean "false", AstSymbol "x"] [] `shouldBe` (Err "Error in 'b': Symbol 'x' not found in the environment.")
+    describe "Insufficient arguments" $ do
+        it "should return an error if there are insufficient arguments" $ do
+            inferior [AstInteger 3] [] `shouldBe` (Err "Error in inferior: Insufficient arguments")
+            inferior [] [] `shouldBe` (Err "Error in inferior: Insufficient arguments")
+
+
+
 
 spec :: Spec
 spec = do
     testAddFunction
     testSubFunction
+    testMultFunction
+    testInferiorFunction
 
 
