@@ -11,6 +11,7 @@ module Eval
         sub,
         mult,
         inferior,
+        division,
         Result (..),
     ) where
 
@@ -58,41 +59,48 @@ add :: [Ast] -> Env -> Result
 add [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x + y)
-        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        (Err errA, _) -> Err ("Error in add 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in add 'b': " ++ errB)
         _ -> Err "Error: Addition requires two integer values."
-add _ _ = Err "Error in add: Insufficient arguments"
+add _ _ = Err "Error in add: Insufficient arguments."
 
 
 sub :: [Ast] -> Env -> Result
 sub [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x - y)
-        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        (Err errA, _) -> Err ("Error in sub 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in sub 'b': " ++ errB)
         _ -> Err "Error: Subtract requires two integer values."
-sub _ _ = Err "Error in sub: Insufficient arguments"
-
+sub _ _ = Err "Error in sub: Insufficient arguments."
 
 
 mult :: [Ast] -> Env -> Result
 mult [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x * y)
-        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        (Err errA, _) -> Err ("Error in mult 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in mult 'b': " ++ errB)
         _ -> Err "Error: Multiplication requires two integer values."
-mult _ _ = Err "Error in mult: Insufficient arguments"
+mult _ _ = Err "Error in mult: Insufficient arguments."
 
 
 inferior :: [Ast] -> Env -> Result
 inferior [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Bool (if x < y then "#t" else "#f")
-        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        (Err errA, _) -> Err ("Error in inferior 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in inferior 'b': " ++ errB)
         _ -> Err "Error: Comparison requires two integer values."
-inferior _ _ = Err "Error in inferior: Insufficient arguments"
+inferior _ _ = Err "Error in inferior: Insufficient arguments."
 
 
-
+division :: [Ast] -> Env -> Result
+division [a, b] env =
+    case (getValue a env, getValue b env) of
+        (_, Value 0) -> Err ("Error: Division by 0 is prohibited")
+        (Value x, Value y) -> Value (x`div`y)
+        (Err errA, _) -> Err ("Error in division 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in division 'b': " ++ errB)
+        _ -> Err "Error: Division requires two integer values."
+division _ _ = Err "Error in division: Insufficient arguments."
