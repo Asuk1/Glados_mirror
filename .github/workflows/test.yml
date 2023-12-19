@@ -16,10 +16,6 @@ jobs:
 
       - name: Setup Haskell
         uses: actions/setup-haskell@v1
-        with:
-          ghc-version: 8.10.3
-          cabal-version: 3.4.0.0
-          stack-version: 2.7.3
 
       - name: Build project
         run: |
@@ -42,10 +38,6 @@ jobs:
 
       - name: Setup Haskell
         uses: actions/setup-haskell@v1
-        with:
-          ghc-version: 8.10.3
-          cabal-version: 3.4.0.0
-          stack-version: 2.7.3
 
       - name: Run unit tests
         run: |
