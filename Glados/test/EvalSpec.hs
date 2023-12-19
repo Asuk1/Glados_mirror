@@ -272,6 +272,32 @@ testEqualFunction = do
             equal [AstInteger 3] [] `shouldBe` (Err "Error in equal: Insufficient arguments.")
             equal [] [] `shouldBe` (Err "Error in equal: Insufficient arguments.")
 
+testIfFunction :: Spec
+testIfFunction = do
+    describe "ifFunction" $ do
+        it "should return Value x when the condition is #t and the true branch is Value x" $ do
+            ifFunction [AstBoolean "#t", AstInteger 42, AstInteger 24] [] `shouldBe` (Value 42)
+        it "should return Value x in env when the condition is #t and the true branch is Value x" $ do
+            let env = [("x", AstBoolean "#t")]
+            ifFunction [AstSymbol "x", AstInteger 42, AstInteger 24] env `shouldBe` (Value 42)
+        it "should return Bool x when the condition is #t and the true branch is Bool x" $ do
+            ifFunction [AstBoolean "#t", AstBoolean "#f", AstBoolean "#t"] [] `shouldBe` (Bool "#f")
+        it "should return Err x when the condition is #t and the true branch is Err x" $ do
+            ifFunction [AstBoolean "#t", AstBoolean "#f", AstSymbol "undefined"] [] `shouldBe` (Bool "#f")
+        it "should return Value y when the condition is #f and the false branch is Value y" $ do
+            ifFunction [AstBoolean "#f", AstInteger 42, AstInteger 24] [] `shouldBe` (Value 24)
+        it "should return Bool y when the condition is #f and the false branch is Bool y" $ do
+            ifFunction [AstBoolean "#f", AstBoolean "#t", AstBoolean "#f"] [] `shouldBe` (Bool "#f")
+        it "should return Err y when the condition is #f and the false branch is Err y" $ do
+            ifFunction [AstBoolean "#f", AstBoolean "#t", AstSymbol "undefined"] [] `shouldBe` (Err "Symbol 'undefined' not found in the environment.")
+        it "should return Err y when the condition is #f and the false branch is Err y" $ do
+            ifFunction [AstBoolean "#t", AstSymbol "undefined", AstBoolean "#t"] [] `shouldBe` (Err "Symbol 'undefined' not found in the environment.")
+        it "should return an error when the condition is not a valid boolean" $ do
+            ifFunction [AstInteger 1, AstInteger 42, AstInteger 24] [] `shouldBe` (Err "Error in if: First argument must be a boolean condition.")
+        it "should return an error when there are insufficient arguments" $ do
+            ifFunction [AstBoolean "#t", AstInteger 42] [] `shouldBe` (Err "Error in if: Insufficient arguments.")
+
+
 
 spec :: Spec
 spec = do
@@ -282,4 +308,5 @@ spec = do
     testDivFunction
     testModFunction
     testEqualFunction
+    testIfFunction
 
