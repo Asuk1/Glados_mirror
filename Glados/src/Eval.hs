@@ -32,7 +32,19 @@ add :: [Ast] -> Env -> Result
 add [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x + y)
+        (Err errA, Err errB) -> Err ["Error in 'a': " ++ errA, "Error in 'b': " ++ errB]
         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Addition requires two integer values."
 add _ _ = Err "Error in add: Insufficient arguments"
+
+multiply :: [Ast] -> Env -> Result
+multiply [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Value (x * y)
+        (Err errA, Err errB) -> Err ["Error in 'a': " ++ errA, "Error in 'b': " ++ errB]
+        (Err errA, _) -> Err ["Error in 'a': " ++ errA]
+        (_, Err errB) -> Err ["Error in 'b': " ++ errB]
+        _ -> Err ["Error: Multiplication requires two integer values."]
+multiply _ _ = Err ["Error in multiply: Insufficient arguments"]
+
