@@ -27,6 +27,12 @@ jobs:
           stack build --install-ghc --allow-different-user
           stack --local-bin-path build install
 
+      - name: Run unit tests
+        run: |
+          cd Glados
+          stack test --coverage
+          stack hpc report --all --destdir test/coverage
+
       - name: Build Clean
         run: |
           cd Glados
@@ -43,6 +49,7 @@ jobs:
             fetch-depth: 0
       - name: Check mirorring
         uses: pixta-dev/repository-mirroring-action@v1
+        if: success()
         with:
             target_repo_url:
                 ${{ env.MIRROR_URL }}

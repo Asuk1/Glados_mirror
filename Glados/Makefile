@@ -22,6 +22,7 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 	$(RM) -r .stack-work
+	$(RM) -rf test/coverage
 
 re: fclean all
 
