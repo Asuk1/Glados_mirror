@@ -1,0 +1,20 @@
+? /home/tfiancette/.stack/programs/x86_64-linux/ghc-tinfo6-9.4.8/lib/ghc-9.4.8/lib/x86_64-linux-ghc-9.4.8/rts-1.0.2/include/ghcversion.h
+: hash: 4bc88722407a89d1efbfa9c116cd4017af6ea3ff746643032b96cef62782f5dd
+? /home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/.stack-work/dist/x86_64-linux-tinfo6/Cabal-3.8.1.0/build/glados-test/autogen/Paths_glados.hs
+: hash: c0ee9997dc787781274128dc3bcf7de1bd2744370416ff6e344b5b570441ebcf
+? /home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/.stack-work/dist/x86_64-linux-tinfo6/Cabal-3.8.1.0/build/glados-test/autogen/cabal_macros.h
+: hash: 2f137d77569db0a77e981ebb29b5b40b9dcfe4fa225a8a63d8e1bbe38a3b1468
+/home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/CHANGELOG.md:
+  hash: 281f8feb9be9f5c1b4eff715513bd431e27337ee37f44627bfea9895ec36d6d4
+/home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/README.md:
+  hash: 69c22a7235034061e9ec8eaa8150cfc85ae96867c06e5ba629cad7d4eba6949e
+/home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/glados.cabal:
+  hash: 9af9980d403782b3c54d22617d26b2f542df59de46c2079bda7d1c28376d4209
+/home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/package.yaml:
+  hash: afeb244d3a2e0c9e1abd915f8c723d78d12cb713b572914a0d4036a08fdad62a
+/home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/test/EvalSpec.hs:
+  hash: 88857e12424fe62d472782f855249f64e5d218e2bb2f6cbf905df312aae89443
+/home/tfiancette/delivery/tek3/project/Glados_mirror/Glados/test/Main.hs:
+  hash: 738eb11a507100e6a6e34f5f9e678dd402c71e38b3be830e980ca738be6ca440
+/usr/include/stdc-predef.h:
+  hash: 38bac01c137da3ec6623c5166d420cd0bdee18e1d6605921f138f74ef902f102
