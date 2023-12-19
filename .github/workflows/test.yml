@@ -27,31 +27,49 @@ jobs:
           stack build --install-ghc --allow-different-user
           stack --local-bin-path build install
 
+      - name: Build Clean
+        run: |
+          cd Glados
+          stack clean
+
+  unit-test:
+    name: Unit Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Haskell
+        uses: actions/setup-haskell@v1
+        with:
+          ghc-version: 8.10.3
+          cabal-version: 3.4.0.0
+          stack-version: 2.7.3
+
       - name: Run unit tests
         run: |
           cd Glados
           stack test --coverage
           stack hpc report --all --destdir test/coverage
 
-      - name: Build Clean
+      - name: Clean after unit tests
         run: |
           cd Glados
           stack clean
 
   mirror:
-    name: Mirorring
-    needs: build
+    name: Mirroring
+    needs: unit-test
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
         uses: actions/checkout@v2
         with:
-            fetch-depth: 0
-      - name: Check mirorring
+          fetch-depth: 0
+      - name: Check mirroring
         uses: pixta-dev/repository-mirroring-action@v1
         if: success()
         with:
-            target_repo_url:
-                ${{ env.MIRROR_URL }}
-            ssh_private_key:
-                ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+          target_repo_url: ${{ env.MIRROR_URL }}
+          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
