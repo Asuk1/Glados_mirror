@@ -3,3 +3,6 @@
 *.cabal
 glados
 dist-newstyle/
+CHANGELOG.md
+LICENSE
+test/coverage
