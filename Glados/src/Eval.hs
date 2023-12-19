@@ -9,6 +9,8 @@ module Eval
     (
         add,
         sub,
+        mult,
+        inferior,
         Result (..),
     ) where
 
@@ -40,6 +42,17 @@ getValue (AstSymbol s) env =
 getValue _ _ = Err "Error: Unsupported expression type"
 
 
+-- if   |✘|
+-- +    |✔|
+-- -    |✔|
+-- *    |✔|
+-- div  |✘|
+-- mod  |✘|
+-- <    |✔|
+-- eq?  |✘|
+
+
+
 
 add :: [Ast] -> Env -> Result
 add [a, b] env =
@@ -59,5 +72,27 @@ sub [a, b] env =
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Subtract requires two integer values."
 sub _ _ = Err "Error in sub: Insufficient arguments"
+
+
+
+mult :: [Ast] -> Env -> Result
+mult [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Value (x * y)
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        _ -> Err "Error: Multiplication requires two integer values."
+mult _ _ = Err "Error in mult: Insufficient arguments"
+
+
+inferior :: [Ast] -> Env -> Result
+inferior [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Bool (if x < y then "#t" else "#f")
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        _ -> Err "Error: Comparison requires two integer values."
+inferior _ _ = Err "Error in inferior: Insufficient arguments"
+
 
 
