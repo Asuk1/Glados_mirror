@@ -149,7 +149,7 @@ testInferiorFunction = do
             inferior [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool "#f")
     describe "Comparison with errors" $ do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
-            inferior [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Comparison requires two integer values.")
+            inferior [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Inferior requires two integer values.")
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             inferior [AstSymbol "x", AstBoolean "false"] [] `shouldBe` (Err "Error in inferior 'a': Symbol 'x' not found in the environment.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
@@ -246,6 +246,32 @@ testModFunction = do
             modulo [AstInteger 8] [] `shouldBe` (Err "Error in modulo: Insufficient arguments.")
             modulo [] [] `shouldBe` (Err "Error in modulo: Insufficient arguments.")
 
+testEqualFunction :: Spec
+testEqualFunction = do
+    describe "Equality with valid integer values" $ do
+        it "should return Bool \"#t\" if 'a' is equal to 'b'" $ do
+            equal [AstInteger 4, AstInteger 4] [] `shouldBe` (Bool "#t")
+        it "should return Bool \"#f\" if 'a' is not equal to 'b'" $ do
+            equal [AstInteger 3, AstInteger 4] [] `shouldBe` (Bool "#f")
+    describe "Equality with valid symbol values" $ do
+        it "should return Bool \"#t\" if symbol 'x' is equal to symbol 'y'" $ do
+            let env = [("x", AstInteger 4), ("y", AstInteger 4)]
+            equal [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool "#t")
+        it "should return Bool \"#f\" if symbol 'x' is not equal to symbol 'y'" $ do
+            let env = [("x", AstInteger 3), ("y", AstInteger 4)]
+            equal [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool "#f")
+    describe "Equality with errors" $ do
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            equal [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Equal requires two integer values.")
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            equal [AstSymbol "x", AstBoolean "false"] [] `shouldBe` (Err "Error in equal 'a': Symbol 'x' not found in the environment.")
+        it "should return an error if 'b' is not a valid integer or symbol" $ do
+            equal [AstBoolean "false", AstSymbol "x"] [] `shouldBe` (Err "Error in equal 'b': Symbol 'x' not found in the environment.")
+    describe "Insufficient arguments." $ do
+        it "should return an error if there are insufficient arguments." $ do
+            equal [AstInteger 3] [] `shouldBe` (Err "Error in equal: Insufficient arguments.")
+            equal [] [] `shouldBe` (Err "Error in equal: Insufficient arguments.")
+
 
 spec :: Spec
 spec = do
@@ -255,4 +281,5 @@ spec = do
     testInferiorFunction
     testDivFunction
     testModFunction
+    testEqualFunction
 
