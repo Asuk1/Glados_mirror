@@ -8,6 +8,7 @@
 module Eval
     (
         add,
+        sub,
         Result (..),
     ) where
 
@@ -48,5 +49,15 @@ add [a, b] env =
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Addition requires two integer values."
 add _ _ = Err "Error in add: Insufficient arguments"
+
+
+sub :: [Ast] -> Env -> Result
+sub [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Value (x - y)
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        _ -> Err "Error: Subtract requires two integer values."
+sub _ _ = Err "Error in sub: Insufficient arguments"
 
 
