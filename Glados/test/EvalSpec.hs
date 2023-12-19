@@ -202,6 +202,49 @@ testDivFunction = do
             division [AstInteger 8] [] `shouldBe` (Err "Error in division: Insufficient arguments.")
             division [] [] `shouldBe` (Err "Error in division: Insufficient arguments.")
 
+testModFunction :: Spec
+testModFunction = do
+    describe "Modulo with valid integer" $ do
+        it "should calculate the modulo of two positive integers" $ do
+            modulo [AstInteger 8, AstInteger 4] [] `shouldBe` (Value 0)
+        it "should calculate the modulo of two negative integers" $ do
+            modulo [AstInteger (-8), AstInteger (-4)] [] `shouldBe` (Value 0)
+        it "should calculate the modulo of one positive integer and one negative integer" $ do
+            modulo [AstInteger 8, AstInteger (-4)] [] `shouldBe` (Value 0)
+        it "should calculate the modulo of one negative integer and one positive integer" $ do
+            modulo [AstInteger (-8), AstInteger 4] [] `shouldBe` (Value 0)
+
+    describe "Modulo with valid symbol" $ do
+        it "should calculate the modulo of two positive integers in the environment" $ do
+            let env = [("x", AstInteger 8), ("y", AstInteger 4)]
+            modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 0)
+        it "should calculate the modulo of two negative integers in the environment" $ do
+            let env = [("x", AstInteger (-8)), ("y", AstInteger (-4))]
+            modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 0)
+        it "should calculate the modulo of one positive integer and one negative integer in the environment" $ do
+            let env = [("x", AstInteger 8), ("y", AstInteger (-4))]
+            modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 0)
+        it "should calculate the modulo of one negative integer and one positive integer in the environment" $ do
+            let env = [("x", AstInteger (-8)), ("y", AstInteger 4)]
+            modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 0)
+
+    describe "Modulo with errors" $ do
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            modulo [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Modulo requires two integer values.")
+        it "should return an error if 'b' is not a valid integer or symbol" $ do
+            modulo [AstInteger 3, AstBoolean "false"] [] `shouldBe` (Err "Error: Modulo requires two integer values.")
+        it "should return an error if 'a' is an integer and 'b' is not" $ do
+            modulo [AstSymbol "x", AstInteger 8] [] `shouldBe` (Err "Error in modulo 'a': Symbol 'x' not found in the environment.")
+        it "should return an error if 'a' is an integer and 'b' is not" $ do
+            modulo [AstInteger 8, AstSymbol "y"] [] `shouldBe` (Err "Error in modulo 'b': Symbol 'y' not found in the environment.")
+        it "should return an error if 'b' is an integer and 'a' is not" $ do
+            let env = [("x", AstInteger 8)]
+            modulo [AstSymbol "x", AstInteger 0] env `shouldBe` (Err "Error: Modulo by 0 is prohibited")
+        it "should return an error if both 'a' and 'b' are not valid integers or symbols" $ do
+            modulo [AstBoolean "true", AstBoolean "false"] [] `shouldBe` (Err "Error: Modulo requires two integer values.")
+        it "should return an error if there are insufficient arguments." $ do
+            modulo [AstInteger 8] [] `shouldBe` (Err "Error in modulo: Insufficient arguments.")
+            modulo [] [] `shouldBe` (Err "Error in modulo: Insufficient arguments.")
 
 
 spec :: Spec
@@ -211,4 +254,5 @@ spec = do
     testMultFunction
     testInferiorFunction
     testDivFunction
+    testModFunction
 
