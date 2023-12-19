@@ -33,10 +33,10 @@ testAddFunction = do
     describe "Addition with errors" $ do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             add [AstBoolean "true", AstInteger 4] [] `shouldBe` (Err "Error: Addition requires two integer values.")
+        it "should return an error if 'b' is not a valid integer or symbol" $ do
+            add [AstSymbol "x", AstInteger 4] [] `shouldBe` (Err "Error in 'a': Symbol 'x' not found in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
             add [AstInteger 3, AstSymbol "y"] [] `shouldBe` (Err "Error in 'b': Symbol 'y' not found in the environment.")
-        it "should return an error if 'b' is an integer and 'a' is not" $ do
-            add [AstSymbol "x", AstInteger 4] [] `shouldBe` (Err "Error in 'a': Symbol 'x' not found in the environment.")
         it "should return an error if 'b' is an integer and 'a' is not" $ do
             let env = [("x", AstInteger 3)]
             add [AstSymbol "x", AstBoolean "false"] env `shouldBe` (Err "Error: Addition requires two integer values.")
@@ -47,12 +47,51 @@ testAddFunction = do
             add [] [] `shouldBe` (Err "Error in add: Insufficient arguments")
 
 
-
+testSubFunction :: Spec
+testSubFunction = do
+    describe "Subtraction with valid integer" $ do
+        it "should subtract two positive integers" $ do
+            sub [AstInteger 3, AstInteger 4] [] `shouldBe` (Value (-1))
+        it "should subtract two negative integers" $ do
+            sub [AstInteger (-3), AstInteger (-4)] [] `shouldBe` (Value 1)
+        it "should subtract one positive integer and one negative integer" $ do
+            sub [AstInteger 3, AstInteger (-4)] [] `shouldBe` (Value 7)
+        it "should subtract one negative integer and one positive integer" $ do
+            sub [AstInteger (-3), AstInteger 4] [] `shouldBe` (Value (-7))
+    describe "Subtraction with valid symbol" $ do
+        it "should subtract two positive integers" $ do
+            let env = [("x", AstInteger 3), ("y", AstInteger 4)]
+            sub [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value (-1))
+        it "should subtract two negative integers" $ do
+            let env = [("x", AstInteger (-3)), ("y", AstInteger (-4))]
+            sub [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 1)
+        it "should subtract one positive integer and one negative integer" $ do
+            let env = [("x", AstInteger 3), ("y", AstInteger (-4))]
+            sub [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 7)
+        it "should subtract one negative integer and one positive integer" $ do
+            let env = [("x", AstInteger (-3)), ("y", AstInteger 4)]
+            sub [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value (-7))
+    describe "Subtraction with errors" $ do
+        it "should return an error if 'a' is not a valid integer or symbol" $ do
+            sub [AstBoolean "true", AstInteger 4] [] `shouldBe`z (Err "Error: Subtract requires two integer values.")
+        it "should return an error if 'b' is not a valid integer or symbol" $ do
+            sub [AstSymbol "x", AstInteger 4] [] `shouldBe` (Err "Error in 'a': Symbol 'x' not found in the environment.")
+        it "should return an error if 'a' is an integer and 'b' is not" $ do
+            sub [AstInteger 3, AstSymbol "y"] [] `shouldBe` (Err "Error in 'b': Symbol 'y' not found in the environment.")
+        it "should return an error if 'b' is an integer and 'a' is not" $ do
+            let env = [("x", AstInteger 3)]
+            sub [AstSymbol "x", AstBoolean "false"] env `shouldBe` (Err "Error: Subtract requires two integer values.")
+        it "should return an error if both 'a' and 'b' are not valid integers or symbols" $ do
+            sub [AstBoolean "true", AstBoolean "false"] [] `shouldBe` (Err "Error: Subtract requires two integer values.")
+        it "should return an error if there are insufficient arguments" $ do
+            sub [AstInteger 3] [] `shouldBe` (Err "Error in sub: Insufficient arguments")
+            sub [] [] `shouldBe` (Err "Error in sub: Insufficient arguments")
 
 
 
 spec :: Spec
 spec = do
     testAddFunction
+    testSubFunction
 
 
