@@ -13,6 +13,7 @@ module Eval
         inferior,
         division,
         modulo,
+        equal,
         Result (..),
     ) where
 
@@ -92,7 +93,7 @@ inferior [a, b] env =
         (Value x, Value y) -> Bool (if x < y then "#t" else "#f")
         (Err errA, _) -> Err ("Error in inferior 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in inferior 'b': " ++ errB)
-        _ -> Err "Error: Comparison requires two integer values."
+        _ -> Err "Error: Inferior requires two integer values."
 inferior _ _ = Err "Error in inferior: Insufficient arguments."
 
 
@@ -116,3 +117,13 @@ modulo [a, b] env =
         (_, Err errB) -> Err ("Error in modulo 'b': " ++ errB)
         _ -> Err "Error: Modulo requires two integer values."
 modulo _ _ = Err "Error in modulo: Insufficient arguments."
+
+
+equal :: [Ast] -> Env -> Result
+equal [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Bool (if x == y then "#t" else "#f")
+        (Err errA, _) -> Err ("Error in equal 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in equal 'b': " ++ errB)
+        _ -> Err "Error: Equal requires two integer values."
+equal _ _ = Err "Error in equal: Insufficient arguments."
