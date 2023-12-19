@@ -14,6 +14,7 @@ module Eval
         division,
         modulo,
         equal,
+        ifFunction,
         Result (..),
     ) where
 
@@ -52,7 +53,7 @@ getValue _ _ = Err "Error: Unsupported expression type"
 -- div  |✔|
 -- mod  |✔|
 -- <    |✔|
--- eq?  |✘|
+-- eq?  |✔|
 
 
 
@@ -127,3 +128,18 @@ equal [a, b] env =
         (_, Err errB) -> Err ("Error in equal 'b': " ++ errB)
         _ -> Err "Error: Equal requires two integer values."
 equal _ _ = Err "Error in equal: Insufficient arguments."
+
+
+ifFunction :: [Ast] -> Env -> Result
+ifFunction [a, b, c] env =
+    case (getValue a env, getValue b env, getValue c env) of
+        (Bool "#t", Value x, _) -> Value x
+        (Bool "#t", Bool x, _) -> Bool x
+        (Bool "#t", Err x, _) -> Err x
+        (Bool "#f", _, Value y) -> Value y
+        (Bool "#f", _, Bool y) -> Bool y
+        (Bool "#f", _, Err y) -> Err y
+        _ -> Err "Error in if: First argument must be a boolean condition."
+ifFunction _ _ = Err "Error in if: Insufficient arguments."
+
+
