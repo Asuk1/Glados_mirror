@@ -12,6 +12,7 @@ module Eval
         mult,
         inferior,
         division,
+        modulo,
         Result (..),
     ) where
 
@@ -47,8 +48,8 @@ getValue _ _ = Err "Error: Unsupported expression type"
 -- +    |✔|
 -- -    |✔|
 -- *    |✔|
--- div  |✘|
--- mod  |✘|
+-- div  |✔|
+-- mod  |✔|
 -- <    |✔|
 -- eq?  |✘|
 
@@ -104,3 +105,14 @@ division [a, b] env =
         (_, Err errB) -> Err ("Error in division 'b': " ++ errB)
         _ -> Err "Error: Division requires two integer values."
 division _ _ = Err "Error in division: Insufficient arguments."
+
+
+modulo :: [Ast] -> Env -> Result
+modulo [a, b] env =
+    case (getValue a env, getValue b env) of
+        (_, Value 0) -> Err ("Error: Modulo by 0 is prohibited")
+        (Value x, Value y) -> Value (x`mod`y)
+        (Err errA, _) -> Err ("Error in modulo 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in modulo 'b': " ++ errB)
+        _ -> Err "Error: Modulo requires two integer values."
+modulo _ _ = Err "Error in modulo: Insufficient arguments."
