@@ -38,6 +38,16 @@ add [a, b] env =
         _ -> Err "Error: Addition requires two integer values."
 add _ _ = Err "Error in add: Insufficient arguments"
 
+subtract :: [Ast] -> Env -> Result
+subtract [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Value (x - y)
+        (Err errA, Err errB) -> Err ["Error in 'a': " ++ errA, "Error in 'b': " ++ errB]
+        (Err errA, _) -> Err ["Error in 'a': " ++ errA]
+        (_, Err errB) -> Err ["Error in 'b': " ++ errB]
+        _ -> Err ["Error: Subtraction requires two integer values."]
+subtract _ _ = Err ["Error in subtract: Insufficient arguments"]
+
 multiply :: [Ast] -> Env -> Result
 multiply [a, b] env =
     case (getValue a env, getValue b env) of
