@@ -1,9 +1,17 @@
-{-
+--
 -- EPITECH PROJECT, 2023
 -- ast
 -- File description:
 -- ast
--}
+--
+
+module Ast (
+    SExpr(..),
+    getSymbol,
+    getInteger,
+    getList,
+    printTree,
+) where
 
 data SExpr = SInt Int
            | SSymbol String
@@ -38,17 +46,5 @@ describeElements (x:y:z:xs) = "3 elements: " ++ show x ++ ", " ++ show y ++ ", "
 maybeEmptyList :: [SExpr] -> String
 maybeEmptyList [] = ""
 maybeEmptyList xs = "and " ++ show (length xs) ++ " more elements"
-
-main :: IO ()
-main = do
-    let expr1 = SList [SSymbol "define", SSymbol "x", SInt 5]
-    let expr2 = SSymbol "x"
-    let expr3 = SList [SSymbol "define", SSymbol "y", SList [SSymbol "+", SInt 5, SSymbol "x"]]
-
-    putStrLn $ "printTree <" ++ show expr1 ++ ">: " ++ show (printTree expr1)
-    putStrLn ""
-    putStrLn $ "printTree <" ++ show expr2 ++ ">: " ++ show (printTree expr2)
-    putStrLn ""
-    putStrLn $ "printTree <" ++ show expr3 ++ ">: " ++ show (printTree expr3)
 
 

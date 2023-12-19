@@ -1,9 +1,11 @@
-{-
+--
 -- EPITECH PROJECT, 2023
 -- parser
 -- File description:
 -- parser
--}
+--
+
+module Spec where
 
 import Test.HUnit
 import Parser (
