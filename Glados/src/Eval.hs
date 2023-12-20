@@ -62,3 +62,12 @@ divide [a, b] env =
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Division requires two integer values."
 divide _ _ = Err "Error in divide: Insufficient arguments"
+
+multiply :: [Ast] -> Env -> Result
+multiply [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Value (x * y)
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        _ -> Err "Error: Multiplication requires two integer values."
+multiply _ _ = Err "Error in multiply: Insufficient arguments"
