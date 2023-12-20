@@ -53,3 +53,12 @@ subtract [a, b] env =
         _ -> Err "Error: Subtraction requires two integer values."
 subtract _ _ = Err "Error in subtract: Insufficient arguments"
 
+divide :: [Ast] -> Env -> Result
+divide [a, b] env =
+    case (getValue a env, getValue b env) of
+        (_, Value 0) -> Err "Error: Division by zero."
+        (Value x, Value y) -> Value (x `div` y)
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        _ -> Err "Error: Division requires two integer values."
+divide _ _ = Err "Error in divide: Insufficient arguments"
