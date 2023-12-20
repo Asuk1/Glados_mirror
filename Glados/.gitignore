@@ -6,3 +6,4 @@ dist-newstyle/
 CHANGELOG.md
 LICENSE
 test/coverage
+test/coverage/
