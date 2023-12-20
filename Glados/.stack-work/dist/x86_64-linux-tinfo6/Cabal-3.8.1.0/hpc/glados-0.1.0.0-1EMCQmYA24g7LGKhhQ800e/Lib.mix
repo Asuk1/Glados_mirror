@@ -1,1 +1,0 @@
-Mix "src/Lib.hs" 2023-12-19 14:09:51.799248206 UTC 2048922274 8 [(8:21-8:30,ExpBox False),(8:12-8:30,ExpBox False),(8:1-8:30,TopLevelBox ["someFunc"]),(15:40-15:43,TopLevelBox ["showsPrec"]),(15:40-15:43,TopLevelBox ["show"]),(15:40-15:43,TopLevelBox ["showList"])]
