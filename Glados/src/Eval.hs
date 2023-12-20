@@ -46,17 +46,6 @@ getValue (AstSymbol s) env =
 getValue _ _ = Err "Error: Unsupported expression type"
 
 
--- if   |✘|
--- +    |✔|
--- -    |✔|
--- *    |✔|
--- div  |✔|
--- mod  |✔|
--- <    |✔|
--- eq?  |✔|
-
-
-
 
 add :: [Ast] -> Env -> Result
 add [a, b] env =
@@ -64,6 +53,9 @@ add [a, b] env =
         (Value x, Value y) -> Value (x + y)
         (Err errA, _) -> Err ("Error in add 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in add 'b': " ++ errB)
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Addition requires two integer values."
 add _ _ = Err "Error in add: Insufficient arguments."
 
@@ -143,3 +135,93 @@ ifFunction [a, b, c] env =
 ifFunction _ _ = Err "Error in if: Insufficient arguments."
 
 
+-- subtract :: [Ast] -> Env -> Result
+-- subtract [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (Value x, Value y) -> Value (x - y)
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+--         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+--         _ -> Err "Error: Subtraction requires two integer values."
+-- subtract _ _ = Err "Error in subtract: Insufficient arguments"
+
+-- divide :: [Ast] -> Env -> Result
+-- divide [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (_, Value 0) -> Err "Error: Division by zero."
+--         (Value x, Value y) -> Value (x `div` y)
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+--         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+--         _ -> Err "Error: Division requires two integer values."
+-- divide _ _ = Err "Error in divide: Insufficient arguments"
+
+-- multiply :: [Ast] -> Env -> Result
+-- multiply [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (Value x, Value y) -> Value (x * y)
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+--         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+--         _ -> Err "Error: Multiplication requires two integer values."
+-- multiply _ _ = Err "Error in multiply: Insufficient arguments"
+
+-- modulo :: [Ast] -> Env -> Result
+-- modulo [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (_, Value 0) -> Err "Error: Division by zero (modulo)."
+--         (Value x, Value y) -> Value (x `mod` y)
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+--         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+--         _ -> Err "Error: Modulo requires two integer values."
+-- modulo _ _ = Err "Error in modulo: Insufficient arguments"
+
+-- equal :: [Ast] -> Env -> Result
+-- equal [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (Value x, Value y) -> Bool (show (x == y))
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+--         (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+--         _ -> Err "Error: Equality comparison requires two values."
+-- equal _ _ = Err "Error in equal: Insufficient arguments"
+
+-- lessThan :: [Ast] -> Env -> Result
+-- lessThan [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (Value x, Value y) -> Bool (show (x < y))
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+--         (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+--         _ -> Err "Error: Comparison requires two integer values."
+-- lessThan _ _ = Err "Error in <: Insufficient arguments"
+
+-- greaterThan :: [Ast] -> Env -> Result
+-- greaterThan [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (Value x, Value y) -> Bool (show (x > y))
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+--         (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+--         _ -> Err "Error: Comparison requires two integer values."
+-- greaterThan _ _ = Err "Error in >: Insufficient arguments"
+
+-- notEqual :: [Ast] -> Env -> Result
+-- notEqual [a, b] env =
+--     case (getValue a env, getValue b env) of
+--         (Value x, Value y) -> Bool (show (x /= y))
+--         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+--         (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+--         (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+--         _ -> Err "Error: Comparison requires two integer values."
+
+-- evalIf :: (Int -> Int -> Bool) -> [Ast] -> Env -> Result
+-- evalIf compFunc [x, y] env =
+--     case (getValue x env, getValue y env) of
+--         (Value a, Value b) -> Bool (show (compFunc a b))
+--         (Err errA, Err errB) -> Err $ "Error in 'x': " ++ errA ++ ", Error in 'y': " ++ errB
+--         (Err errA, _) -> Err $ "Error in 'x': " ++ errA
+--         (_, Err errB) -> Err $ "Error in 'y': " ++ errB
+--         _ -> Err "Error: Comparison requires two integer values."
+-- evalIf _ _ _ = Err "Error in 'if': Insufficient arguments"
