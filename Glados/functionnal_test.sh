@@ -5,7 +5,8 @@ check_executable() {
     local executable_name="$current_directory/glados"
     local executable="$1"
 
-    if command -v "$executable" >/dev/null 2>&1; then
+    # if command -v "$executable" >/dev/null 2>&1; then
+    if command -v "glados" >/dev/null 2>&1; then
         echo -e "\033[32m✔\033[0m: L'exécutable glados est présent."
         return 0
     else
@@ -46,4 +47,4 @@ run_test() {
 check_executable "$executable_name"
 
 
-run_test "Path/File.scm" "4" "2 * 2"
+run_test "test/test_simple.scm" "[\"(\",\"define\",\"x\",\"42\",\")\",\"(\",\"+\",\"x\",\"32\",\")\"]" "Test simple"
