@@ -1,6 +1,6 @@
 ##
 ## EPITECH PROJECT, 2023
-## Makefile
+## GlaDos
 ## File description:
 ## Makefile
 ##
@@ -22,6 +22,7 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 	$(RM) -r .stack-work
+	$(RM) -rf test/coverage
 
 re: fclean all
 

@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- HUnit
 
 ghc-options:
 - -Wall
@@ -48,12 +49,26 @@ executables:
     - glados
 
 tests:
-  glados-test:
-    main:                Spec.hs
-    source-dirs:         test
+  glados-test-hspec:
+    main:                Main.hs
+    source-dirs:         test-hspec
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - glados
+    - HUnit
+    - hspec
+    - hspec-discover
+  
+  glados-test-hunit:
+    main:                TestSpec.hs
+    source-dirs:         test-hunit
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - glados
+    - HUnit
