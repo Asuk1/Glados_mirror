@@ -63,6 +63,13 @@ testLessThanWithValidSymbols = do
             let env = [("x", AstInteger 5), ("y", AstInteger 10)]
             lessThan [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool True)
 
+testGreaterThanWithValidSymbols :: Spec
+testGreaterThanWithValidSymbols = do
+    describe "Greater than with valid symbols" $ do
+        it "should greater than two integers" $ do
+            let env = [("x", AstInteger 10), ("y", AstInteger 5)]
+            greaterThan [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool True)
+
 spec :: Spec
 spec = do
     testAddWithValidSymbols
