@@ -59,7 +59,7 @@ jobs:
     name: Release
     needs: mirror
     runs-on: ubuntu-latest
-    if: github.ref == 'main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
