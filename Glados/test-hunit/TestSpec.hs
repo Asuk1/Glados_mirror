@@ -5,7 +5,6 @@
 -- parser
 --
 
-module Spec where
 
 import Test.HUnit
 import Parser (
