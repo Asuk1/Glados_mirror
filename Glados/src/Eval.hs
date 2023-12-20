@@ -100,9 +100,19 @@ equal _ _ = Err "Error in equal: Insufficient arguments"
 lessThan :: [Ast] -> Env -> Result
 lessThan [a, b] env =
     case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Bool (x < y)
+        (Value x, Value y) -> Bool (show (x < y))
         (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
         (Err errA, _) -> Err $ "Error in 'a': " ++ errA
         (_, Err errB) -> Err $ "Error in 'b': " ++ errB
         _ -> Err "Error: Comparison requires two integer values."
 lessThan _ _ = Err "Error in <: Insufficient arguments"
+
+greaterThan :: [Ast] -> Env -> Result
+greaterThan [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Bool (show (x > y))
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+        (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+        (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+        _ -> Err "Error: Comparison requires two integer values."
+greaterThan _ _ = Err "Error in >: Insufficient arguments"
