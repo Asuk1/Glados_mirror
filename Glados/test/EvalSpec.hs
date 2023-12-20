@@ -88,6 +88,14 @@ testIfOnAllFunction = do
         it "should return Bool False" $ do
             let env = evalIf greaterThan [AstInteger 5, AstInteger 10] []
             env `shouldBe` Bool False
+        
+        it "should return Bool True" $ do
+            let env = evalIf equal [AstInteger 10, AstInteger 10] []
+            env `shouldBe` Bool True
+        
+        it "should return Bool False" $ do
+            let env = evalIf equal [AstInteger 5, AstInteger 10] []
+            env `shouldBe` Bool False
 
 spec :: Spec
 spec = do
