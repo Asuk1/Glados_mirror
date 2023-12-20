@@ -49,6 +49,13 @@ testEqualWithValidSymbols = do
             let env = [("x", AstInteger 5), ("y", AstInteger 5)]
             equal [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool True)
 
+testNotEqualWithValidSymbols :: Spec
+testNotEqualWithValidSymbols = do
+    describe "Not equal with valid symbols" $ do
+        it "should not equal two integers" $ do
+            let env = [("x", AstInteger 5), ("y", AstInteger 10)]
+            equal [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool False)
+
 
 spec :: Spec
 spec = do
