@@ -39,6 +39,7 @@ add :: [Ast] -> Env -> Result
 add [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x + y)
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Addition requires two integer values."
@@ -48,6 +49,7 @@ subtract :: [Ast] -> Env -> Result
 subtract [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x - y)
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Subtraction requires two integer values."
@@ -58,6 +60,7 @@ divide [a, b] env =
     case (getValue a env, getValue b env) of
         (_, Value 0) -> Err "Error: Division by zero."
         (Value x, Value y) -> Value (x `div` y)
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Division requires two integer values."
@@ -67,6 +70,7 @@ multiply :: [Ast] -> Env -> Result
 multiply [a, b] env =
     case (getValue a env, getValue b env) of
         (Value x, Value y) -> Value (x * y)
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Multiplication requires two integer values."
@@ -77,8 +81,20 @@ modulo [a, b] env =
     case (getValue a env, getValue b env) of
         (_, Value 0) -> Err "Error: Division by zero (modulo)."
         (Value x, Value y) -> Value (x `mod` y)
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
         (Err errA, _) -> Err ("Error in 'a': " ++ errA)
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Modulo requires two integer values."
 modulo _ _ = Err "Error in modulo: Insufficient arguments"
+
+equal :: [Ast] -> Env -> Result
+equal [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Bool (show (x == y))
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+        (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+        (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+        _ -> Err "Error: Equality comparison requires two values."
+equal _ _ = Err "Error in equal: Insufficient arguments"
+
 
