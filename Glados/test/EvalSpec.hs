@@ -35,7 +35,12 @@ testMultiplyWithValidSymbols = do
             let env = [("x", AstInteger 10), ("y", AstInteger 10)]
             multiply [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 100)
 
-
+testModuloWithValidSymbols :: Spec
+testModuloWithValidSymbols = do
+    describe "Modulo with valid symbols" $ do
+        it "should modulo two integers" $ do
+            let env = [("x", AstInteger 5), ("y", AstInteger 10)]
+            modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 5)
 
 spec :: Spec
 spec = do
