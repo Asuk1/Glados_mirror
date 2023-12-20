@@ -28,6 +28,13 @@ testDivideWithValidSymbols = do
             let env = [("x", AstInteger 10), ("y", AstInteger 2)]
             divide [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 5)
 
+testMultiplyWithValidSymbols :: Spec
+testMultiplyWithValidSymbols = do
+    describe "Multiplication with valid symbols" $ do
+        it "should multiply two integers" $ do
+            let env = [("x", AstInteger 10), ("y", AstInteger 10)]
+            multiply [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 100)
+
 
 
 spec :: Spec
