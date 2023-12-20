@@ -41,15 +41,6 @@ testModuloWithValidSymbols = do
         it "should modulo two integers" $ do
             let env = [("x", AstInteger 5), ("y", AstInteger 10)]
             modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 5)
-equal :: [Ast] -> Env -> Result
-equal [a, b] env =
-    case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Bool (show x == show y)
-        (Err errA, Err errB) -> Err ["Error in 'a': " ++ errA, "Error in 'b': " ++ errB]
-        (Err errA, _) -> Err ["Error in 'a': " ++ errA]
-        (_, Err errB) -> Err ["Error in 'b': " ++ errB]
-        _ -> Err ["Error: Equality comparison requires two values."]
-equal _ _ = Err ["Error in equal: Insufficient arguments"]
 
 spec :: Spec
 spec = do
