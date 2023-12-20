@@ -21,6 +21,12 @@ testSubtractWithValidSymbols = do
             let env = [("x", AstInteger 3), ("y", AstInteger 4)]
             subtract [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value (-1))
 
+testDivideWithValidSymbols :: Spec
+testDivideWithValidSymbols = do
+    describe "Division with valid symbols" $ do
+        it "should divide two integers" $ do
+            let env = [("x", AstInteger 10), ("y", AstInteger 2)]
+            divide [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 5)
 
 
 
