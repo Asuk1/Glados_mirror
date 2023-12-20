@@ -71,3 +71,14 @@ multiply [a, b] env =
         (_, Err errB) -> Err ("Error in 'b': " ++ errB)
         _ -> Err "Error: Multiplication requires two integer values."
 multiply _ _ = Err "Error in multiply: Insufficient arguments"
+
+modulo :: [Ast] -> Env -> Result
+modulo [a, b] env =
+    case (getValue a env, getValue b env) of
+        (_, Value 0) -> Err "Error: Division by zero (modulo)."
+        (Value x, Value y) -> Value (x `mod` y)
+        (Err errA, _) -> Err ("Error in 'a': " ++ errA)
+        (_, Err errB) -> Err ("Error in 'b': " ++ errB)
+        _ -> Err "Error: Modulo requires two integer values."
+modulo _ _ = Err "Error in modulo: Insufficient arguments"
+
