@@ -42,6 +42,14 @@ testModuloWithValidSymbols = do
             let env = [("x", AstInteger 5), ("y", AstInteger 10)]
             modulo [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Value 5)
 
+testEqualWithValidSymbols :: Spec
+testEqualWithValidSymbols = do
+    describe "Equal with valid symbols" $ do
+        it "should equal two integers" $ do
+            let env = [("x", AstInteger 5), ("y", AstInteger 5)]
+            equal [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool True)
+
+
 spec :: Spec
 spec = do
     testAddWithValidSymbols
