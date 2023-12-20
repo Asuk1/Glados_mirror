@@ -56,6 +56,12 @@ testNotEqualWithValidSymbols = do
             let env = [("x", AstInteger 5), ("y", AstInteger 10)]
             equal [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool False)
 
+testLessThanWithValidSymbols :: Spec
+testLessThanWithValidSymbols = do
+    describe "Less than with valid symbols" $ do
+        it "should less than two integers" $ do
+            let env = [("x", AstInteger 5), ("y", AstInteger 10)]
+            lessThan [AstSymbol "x", AstSymbol "y"] env `shouldBe` (Bool True)
 
 spec :: Spec
 spec = do
