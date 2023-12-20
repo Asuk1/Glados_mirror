@@ -117,6 +117,15 @@ greaterThan [a, b] env =
         _ -> Err "Error: Comparison requires two integer values."
 greaterThan _ _ = Err "Error in >: Insufficient arguments"
 
+notEqual :: [Ast] -> Env -> Result
+notEqual [a, b] env =
+    case (getValue a env, getValue b env) of
+        (Value x, Value y) -> Bool (show (x /= y))
+        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
+        (Err errA, _) -> Err $ "Error in 'a': " ++ errA
+        (_, Err errB) -> Err $ "Error in 'b': " ++ errB
+        _ -> Err "Error: Comparison requires two integer values."
+
 evalIf :: (Int -> Int -> Bool) -> [Ast] -> Env -> Result
 evalIf compFunc [x, y] env =
     case (getValue x env, getValue y env) of
