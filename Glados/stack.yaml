@@ -65,3 +65,7 @@ packages:
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
+
+extra-deps:
+- HUnit-1.6.2.0
+
