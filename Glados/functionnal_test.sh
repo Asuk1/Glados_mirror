@@ -48,3 +48,4 @@ check_executable "$executable_name"
 
 
 run_test "test/test_simple.scm" "[\"(\",\"define\",\"x\",\"42\",\")\",\"(\",\"+\",\"x\",\"32\",\")\"]" "Test simple"
+run_test "test/test.scm" "[\"(\",\"define\",\"x\",\"42\",\")\"]" "Test"
