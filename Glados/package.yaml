@@ -49,9 +49,9 @@ executables:
     - glados
 
 tests:
-  glados-test:
+  glados-test-hspec:
     main:                Main.hs
-    source-dirs:         test
+    source-dirs:         test-hspec
     ghc-options:
     - -threaded
     - -rtsopts
@@ -61,3 +61,14 @@ tests:
     - HUnit
     - hspec
     - hspec-discover
+  
+  glados-test-hunit:
+    main:                TestSpec.hs
+    source-dirs:         test-hunit
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - glados
+    - HUnit

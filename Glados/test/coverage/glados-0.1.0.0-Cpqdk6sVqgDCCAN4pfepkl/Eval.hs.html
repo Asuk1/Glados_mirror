@@ -1,0 +1,69 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>--
+<span class="lineno">    2 </span>-- EPITECH PROJECT, 2023
+<span class="lineno">    3 </span>-- Glados
+<span class="lineno">    4 </span>-- File description:
+<span class="lineno">    5 </span>-- Eval
+<span class="lineno">    6 </span>--
+<span class="lineno">    7 </span>
+<span class="lineno">    8 </span>module Eval
+<span class="lineno">    9 </span>    (
+<span class="lineno">   10 </span>        add,
+<span class="lineno">   11 </span>        Result (..),
+<span class="lineno">   12 </span>    ) where
+<span class="lineno">   13 </span>
+<span class="lineno">   14 </span>import Lib
+<span class="lineno">   15 </span>
+<span class="lineno">   16 </span>data Result = Value Int | Bool String | Err String
+<span class="lineno">   17 </span>
+<span class="lineno">   18 </span>instance <span class="decl"><span class="nottickedoff">Eq Result</span></span> where
+<span class="lineno">   19 </span>    <span class="decl"><span class="istickedoff">(Value x) == (Value y) = x == y</span>
+<span class="lineno">   20 </span><span class="spaces">    </span><span class="istickedoff">(Bool s1) == (Bool s2) = <span class="nottickedoff">s1 == s2</span></span>
+<span class="lineno">   21 </span><span class="spaces">    </span><span class="istickedoff">(Err e1) == (Err e2) = <span class="nottickedoff">e1 == e2</span></span>
+<span class="lineno">   22 </span><span class="spaces">    </span><span class="istickedoff">_ == _ = <span class="nottickedoff">False</span></span></span>
+<span class="lineno">   23 </span>
+<span class="lineno">   24 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show Result</span></span></span></span> where
+<span class="lineno">   25 </span>    <span class="decl"><span class="nottickedoff">show (Value x) = &quot;Value &quot; ++ show x</span>
+<span class="lineno">   26 </span><span class="spaces">    </span><span class="nottickedoff">show (Bool s) = &quot;Bool &quot; ++ show s</span>
+<span class="lineno">   27 </span><span class="spaces">    </span><span class="nottickedoff">show (Err s) = &quot;Err &quot; ++ show s</span></span>
+<span class="lineno">   28 </span>
+<span class="lineno">   29 </span>
+<span class="lineno">   30 </span>getValue :: Ast -&gt; Env -&gt; Result
+<span class="lineno">   31 </span><span class="decl"><span class="istickedoff">getValue (AstInteger a) _ = Value a</span>
+<span class="lineno">   32 </span><span class="spaces"></span><span class="istickedoff">getValue (AstSymbol s) env =</span>
+<span class="lineno">   33 </span><span class="spaces">    </span><span class="istickedoff">case lookup s env of</span>
+<span class="lineno">   34 </span><span class="spaces">        </span><span class="istickedoff">Just value -&gt; getValue value <span class="nottickedoff">env</span></span>
+<span class="lineno">   35 </span><span class="spaces">        </span><span class="istickedoff">Nothing -&gt; <span class="nottickedoff">Err (&quot;Symbol '&quot; ++ s ++ &quot;' not found in the environment.&quot;)</span></span>
+<span class="lineno">   36 </span><span class="spaces"></span><span class="istickedoff">getValue _ _ = <span class="nottickedoff">Err &quot;Error: Unsupported expression type&quot;</span></span></span>
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>add :: [Ast] -&gt; Env -&gt; Result
+<span class="lineno">   39 </span><span class="decl"><span class="istickedoff">add [a, b] env =</span>
+<span class="lineno">   40 </span><span class="spaces">    </span><span class="istickedoff">case (getValue a env, getValue b env) of</span>
+<span class="lineno">   41 </span><span class="spaces">        </span><span class="istickedoff">(Value x, Value y) -&gt; Value (x + y)</span>
+<span class="lineno">   42 </span><span class="spaces">        </span><span class="istickedoff">(Err errA, _) -&gt; <span class="nottickedoff">Err (&quot;Error in 'a': &quot; ++ errA)</span></span>
+<span class="lineno">   43 </span><span class="spaces">        </span><span class="istickedoff">(_, Err errB) -&gt; <span class="nottickedoff">Err (&quot;Error in 'b': &quot; ++ errB)</span></span>
+<span class="lineno">   44 </span><span class="spaces">        </span><span class="istickedoff">_ -&gt; <span class="nottickedoff">Err &quot;Error: Addition requires two integer values.&quot;</span></span>
+<span class="lineno">   45 </span><span class="spaces"></span><span class="istickedoff">add _ _ = <span class="nottickedoff">Err &quot;Error in add: Insufficient arguments&quot;</span></span></span>
+<span class="lineno">   46 </span>
+
+</pre>
+</body>
+</html>
