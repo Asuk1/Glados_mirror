@@ -56,7 +56,7 @@ jobs:
           bash functionnal_test.sh
 
   mirror:
-    needs: test
+    needs: functional-test
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
