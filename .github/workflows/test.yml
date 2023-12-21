@@ -40,6 +40,20 @@ jobs:
           stack test --coverage
           stack hpc report --all --destdir test/coverage
 
+  functional-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run functional test
+        run: |
+          cd Glados
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build install
+          cp $(stack path --local-install-root)/bin/glados ./glados
+          bash functionnal_test.sh
+
   mirror:
     needs: test
     runs-on: ubuntu-latest

@@ -44,7 +44,7 @@ run_test() {
 
 
 
-check_executable "$executable_name"
+#check_executable "$executable_name"
 
 
 run_test "test/test_simple.scm" "[\"(\",\"define\",\"x\",\"42\",\")\",\"(\",\"+\",\"x\",\"32\",\")\"]" "Test simple"
