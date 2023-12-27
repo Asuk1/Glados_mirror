@@ -1,4 +1,4 @@
-name: Build and Mirror
+name: Build - Test - Miror - Release
 
 on:
   push:
@@ -9,58 +9,54 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Setup Haskell
+      - uses: actions/checkout@v2
+      - name: Set up Haskell
         uses: actions/setup-haskell@v1
         with:
-          ghc-version: 8.10.3
-          cabal-version: 3.4.0.0
-          stack-version: 2.7.3
-
+          ghc-version: '8.10.3'
+          cabal-version: '3.4.0.0'
+          stack-version: '2.7.3'
       - name: Build project
         run: |
           cd Glados
           stack build --install-ghc --allow-different-user
           stack --local-bin-path build install
 
-      - name: Build Clean
-        run: |
-          cd Glados
-          stack clean
-
-  unit-test:
-    name: Unit Test
+  test:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Setup Haskell
+      - uses: actions/checkout@v2
+      - name: Set up Haskell
         uses: actions/setup-haskell@v1
         with:
-          ghc-version: 8.10.3
-          cabal-version: 3.4.0.0
-          stack-version: 2.7.3
-
+          ghc-version: '8.10.3'
+          cabal-version: '3.4.0.0'
+          stack-version: '2.7.3'
       - name: Run unit tests
         run: |
           cd Glados
           stack test --coverage
           stack hpc report --all --destdir test/coverage
 
-      - name: Clean after unit tests
+  functional-test:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run functional test
         run: |
           cd Glados
-          stack clean
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build install
+          cp $(stack path --local-install-root)/bin/glados ./glados
+          bash functionnal_test.sh
 
   mirror:
-    name: Mirroring
-    needs: unit-test
+    needs: functional-test
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
@@ -73,3 +69,51 @@ jobs:
         with:
           target_repo_url: ${{ env.MIRROR_URL }}
           ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+
+  create-release:
+    name: Release
+    needs: mirror
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Zip the Glados
+        run: |
+          cd Glados
+          zip -r glados-project-${{ github.run_number }}.zip .
+          stack build --install-ghc --allow-different-user
+          cp $(stack path --local-install-root)/bin/glados ./glados
+          zip glados-${{ github.run_number }}.zip glados
+          ls -l
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+          body: |
+            Changes Glados version
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Glados/glados-project-${{ github.run_number }}.zip
+          asset_name: glados-project-${{ github.run_number }}.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset (glados-executable)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Glados/glados-${{ github.run_number }}.zip
+          asset_name: glados-${{ github.run_number }}.zip
+          asset_content_type: application/zip
