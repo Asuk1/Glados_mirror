@@ -34,9 +34,13 @@ run_test() {
 
     if [ "$actual_output" == "$expected_output" ]; then
         echo -e "\033[32m✔\033[0m: $title"
+        printf "Expected output: $expected_output\n"
+        printf "Actual output: $actual_output\n"
         return 0
     else
         echo -e "\033[31m✘\033[0m: $title"
+        printf "Expected output: $expected_output\n"
+        printf "Actual output: $actual_output\n"
         return 1
     fi
 }
