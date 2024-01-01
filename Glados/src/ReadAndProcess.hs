@@ -6,13 +6,14 @@ module ReadAndProcess
 
 import System.IO (stdin, hGetContents)
 import Tokenization
+import Cpt
 
 readFileAndProcess :: FilePath -> IO ()
 readFileAndProcess filename = do
     contents <- readFile filename
-    putStrLn (show (stringToToken contents))
+    putStrLn (show (tokenToCpt (stringToToken contents)))
 
 readStdinAndProcess :: IO ()
 readStdinAndProcess = do
     contents <- hGetContents stdin
-    putStrLn (show (stringToToken contents))
+    putStrLn (show (tokenToCpt (stringToToken contents)))

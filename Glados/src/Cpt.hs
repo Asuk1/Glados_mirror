@@ -16,16 +16,16 @@ tokenToCpt tokens = case parseList tokens of
 
 parseList :: [String] -> ([Cpt], [String])
 parseList [] = ([], [])
-parseList (")" : rest) = ([], rest)
+parseList (")" : xs) = ([], xs)
 parseList tokens =
-    let (cpt, rest1) = parseElement tokens
-        (subList, rest2) = parseList rest1
-    in (cpt : subList, rest2)
+    let (cpt, xs) = parseElement tokens
+        (cptList, rest) = parseList xs
+    in (cpt : cptList, rest)
 
 parseElement :: [String] -> (Cpt, [String])
-parseElement (token : rest)
-    | (head token == '-' && all isDigit (tail token)) || all isDigit token = (CptInt (read token), rest)
+parseElement (token : xs)
+    | (head token == '-' && all isDigit (tail token)) || all isDigit token = (CptInt (read token), xs)
     | token == "(" =
-        let (subList, restList) = parseList rest
-        in (CptList subList, restList)
-    | otherwise = (CptSymbols token, rest)
+        let (cptList, rest) = parseList xs
+        in (CptList cptList, rest)
+    | otherwise = (CptSymbols token, xs)
