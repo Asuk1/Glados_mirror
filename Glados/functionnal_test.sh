@@ -47,5 +47,5 @@ run_test() {
 #check_executable "$executable_name"
 
 
-run_test "test/test_simple.scm" "[\"(\",\"define\",\"x\",\"42\",\")\",\"(\",\"+\",\"x\",\"32\",\")\"]" "Test simple"
-run_test "test/test.scm" "[\"(\",\"define\",\"x\",\"42\",\")\"]" "Test"
+run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42],CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
+run_test "test/test.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]" "Test"
