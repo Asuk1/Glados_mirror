@@ -40,8 +40,23 @@ jobs:
           stack test --coverage
           stack hpc report --all --destdir test/coverage
 
-  mirror:
+  functional-test:
+    runs-on: ubuntu-latest
     needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run functional test
+        run: |
+          cd Glados
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build install
+          cp $(stack path --local-install-root)/bin/glados ./glados
+          bash functionnal_test.sh
+
+  mirror:
+    needs: functional-test
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
@@ -66,7 +81,11 @@ jobs:
       - name: Zip the Glados
         run: |
           cd Glados
-          zip -r glados-${{ github.run_number }}.zip .
+          zip -r glados-project-${{ github.run_number }}.zip .
+          stack build --install-ghc --allow-different-user
+          cp $(stack path --local-install-root)/bin/glados ./glados
+          zip glados-${{ github.run_number }}.zip glados
+          ls -l
 
       - name: Create Release
         id: create_release
@@ -81,6 +100,15 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Glados/glados-project-${{ github.run_number }}.zip
+          asset_name: glados-project-${{ github.run_number }}.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset (glados-executable)
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
