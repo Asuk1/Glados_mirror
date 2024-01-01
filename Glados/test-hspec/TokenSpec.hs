@@ -2,7 +2,6 @@ module TokenSpec (spec) where
 
 import Test.Hspec
 import Tokenization
-import Lib
 
 
 
