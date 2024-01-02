@@ -23,7 +23,7 @@ Le parser du projet Glados est un outil conçu pour analyser et transformer le c
 
 ## USAGE ##
 
-./glados <file>
+./glados < <file>
 
 Remplacez <file> par le chemin du fichier contenant le code source que vous souhaitez parser.
 
@@ -34,7 +34,7 @@ Remplacez <file> par le chemin du fichier contenant le code source que vous souh
 
 ## Sortie du Parser ##
 
-["(", "define", "x", "42", ")", "(", "*", "42", "x", ")"]
+[CptList [CptSymbols "define", CptSymbols "x", CptInt 42], CptList [CptSymbols "*", CptInt 42, CptSymbols "x"]]
 
 ## Overview CI/CD ##
 
@@ -45,9 +45,10 @@ La CI/CD dans ce projet est composé de plusieurs parties, tout d'abord une part
 Les tests unitaires dans ce projet sont composés de plusieurs parties:
 Pour lancer les tests unitaires il faut utiliser la commande `make tests_run`
 
-On à des tests sur:
+On a des tests sur:
 
 - la tokenisation
+- conversion des tokens au format CPT
 - les opérations d'évaluation
 - l'identification des variables
 
@@ -55,4 +56,4 @@ On à des tests sur:
 
 On fait cette commmande:
 
-./glados <file>
+./glados < <file>
