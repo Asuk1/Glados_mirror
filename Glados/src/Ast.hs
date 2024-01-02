@@ -13,10 +13,19 @@ module Ast (
     printTree,
 ) where
 
+import Data.Maybe
+
 data SExpr = SInt Int
            | SSymbol String
            | SList [SExpr]
            deriving Show
+
+data Ast = AstInteger Int
+    | AstSymbol String
+    | AstBoolean String
+    | AstCall [Ast]
+    | AstDefine (Either String [String]) Ast
+    | AstLambda [String] Ast deriving (Show)
 
 getSymbol :: SExpr -> Maybe String
 getSymbol (SSymbol s) = Just s
@@ -46,5 +55,25 @@ describeElements (x:y:z:xs) = "3 elements: " ++ show x ++ ", " ++ show y ++ ", "
 maybeEmptyList :: [SExpr] -> String
 maybeEmptyList [] = ""
 maybeEmptyList xs = "and " ++ show (length xs) ++ " more elements"
+
+sexprToAST :: SExpr -> Maybe Ast
+sexprToAST (SInt n) = Just (AstInteger n)
+sexprToAST (SSymbol s) = Just (AstSymbol s)
+sexprToAST (SList []) = Nothing
+
+sexprToAST (SList (SSymbol "define" : SSymbol var : exprs)) =
+  case mapMaybe sexprToAST exprs of
+    [value] -> Just (AstDefine (Left var) value)
+    _ -> Nothing
+
+sexprToAST (SList (SSymbol func : args)) =
+  case mapMaybe sexprToAST args of
+    [] -> Nothing
+    argList -> Just (AstCall (AstSymbol func : argList))
+
+sexprToAST (SList (SInt n : xs)) = Just (AstCall (AstInteger n : mapMaybe sexprToAST xs))
+sexprToAST (SList (SSymbol s : xs)) = Just (AstCall (AstSymbol s : mapMaybe sexprToAST xs))
+sexprToAST _ = Nothing
+
 
 
