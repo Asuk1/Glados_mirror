@@ -29,7 +29,7 @@ run_test() {
     local title="$3"
     local executable="./glados"
 
-    actual_output="$($executable "$file_path")"
+    actual_output="$($executable < "$file_path")"
 
 
     if [ "$actual_output" == "$expected_output" ]; then
@@ -50,6 +50,6 @@ run_test() {
 
 #check_executable "$executable_name"
 
-
-run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42],CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
+run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]
+[CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
 run_test "test/test.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]" "Test"
