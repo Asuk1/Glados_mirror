@@ -8,11 +8,8 @@
 module Main (main) where
 
 import ReadAndProcess
-import System.Environment (getArgs)
+import ErrorHandling (error_handling)
 
 main :: IO ()
 main = do
-    args <- getArgs
-    case args of
-        [filename] -> readFileAndProcess filename
-        _ -> readStdinAndProcess
+    readStdinAndProcess
