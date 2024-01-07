@@ -1,3 +1,10 @@
+--
+-- EPITECH PROJECT, 2024
+-- Glados_mirror
+-- File description:
+-- Cpt
+--
+
 module Cpt (
     Cpt(..),
     tokenToCpt,
@@ -13,6 +20,7 @@ data Cpt = CptList [Cpt] | CptSymbols String | CptInt Int
 tokenToCpt :: [String] -> [Cpt]
 tokenToCpt tokens = case parseList tokens of
     (cpts, []) -> cpts
+    (_, rest) -> error $ "Unexpected tokens remaining: " ++ show rest
 
 parseList :: [String] -> ([Cpt], [String])
 parseList [] = ([], [])
@@ -23,6 +31,7 @@ parseList tokens =
     in (cpt : cptList, rest)
 
 parseElement :: [String] -> (Cpt, [String])
+parseElement [] = error "parseElement called with an empty list"
 parseElement (token : xs)
     | (head token == '-' && all isDigit (tail token)) || all isDigit token = (CptInt (read token), xs)
     | token == "(" =
