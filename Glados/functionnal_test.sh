@@ -29,14 +29,18 @@ run_test() {
     local title="$3"
     local executable="./glados"
 
-    actual_output="$($executable "$file_path")"
+    actual_output="$($executable < "$file_path")"
 
 
     if [ "$actual_output" == "$expected_output" ]; then
         echo -e "\033[32m✔\033[0m: $title"
+        printf "Expected output: $expected_output\n"
+        printf "Actual output: $actual_output\n"
         return 0
     else
         echo -e "\033[31m✘\033[0m: $title"
+        printf "Expected output: $expected_output\n"
+        printf "Actual output: $actual_output\n"
         return 1
     fi
 }
@@ -46,6 +50,6 @@ run_test() {
 
 #check_executable "$executable_name"
 
-
-run_test "test/test_simple.scm" "[\"(\",\"define\",\"x\",\"42\",\")\",\"(\",\"+\",\"x\",\"32\",\")\"]" "Test simple"
-run_test "test/test.scm" "[\"(\",\"define\",\"x\",\"42\",\")\"]" "Test"
+run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]
+[CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
+run_test "test/test.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]" "Test"

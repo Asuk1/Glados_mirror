@@ -1,13 +1,14 @@
-module Main (main) where
+--
+-- EPITECH PROJECT, 2023
+-- Glados
+-- File description:
+-- Main
+--
 
-import Lib
-import System.Environment (getArgs)
+module Main (main) where
 
 import ReadAndProcess
 
 main :: IO ()
 main = do
-    args <- getArgs
-    case args of
-        [filename] -> readFileAndProcess filename
-        _ -> readStdinAndProcess
+    readStdinAndProcess
