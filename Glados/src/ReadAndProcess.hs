@@ -19,7 +19,8 @@ import Cpt
 readStdinAndProcess :: IO ()
 readStdinAndProcess = do
     emptyInput <- hIsEOF stdin
-    when emptyInput $
+    when emptyInput $ do
+        putStrLn "Error: file is empty"
         exitWith (ExitFailure 84)
     eof <- isEOF
     unless eof $ do
