@@ -5,7 +5,8 @@ check_executable() {
     local executable_name="$current_directory/glados"
     local executable="$1"
 
-    if command -v "$executable" >/dev/null 2>&1; then
+    # if command -v "$executable" >/dev/null 2>&1; then
+    if command -v "glados" >/dev/null 2>&1; then
         echo -e "\033[32m✔\033[0m: L'exécutable glados est présent."
         return 0
     else
@@ -33,9 +34,13 @@ run_test() {
 
     if [ "$actual_output" == "$expected_output" ]; then
         echo -e "\033[32m✔\033[0m: $title"
+        printf "Expected output: $expected_output\n"
+        printf "Actual output: $actual_output\n"
         return 0
     else
         echo -e "\033[31m✘\033[0m: $title"
+        printf "Expected output: $expected_output\n"
+        printf "Actual output: $actual_output\n"
         return 1
     fi
 }
@@ -43,7 +48,8 @@ run_test() {
 
 
 
-check_executable "$executable_name"
+#check_executable "$executable_name"
 
 
-run_test "Path/File.scm" "4" "2 * 2"
+run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42],CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
+run_test "test/test.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]" "Test"

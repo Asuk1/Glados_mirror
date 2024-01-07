@@ -1,9 +1,14 @@
+--
+-- EPITECH PROJECT, 2023
+-- Glados
+-- File description:
+-- Main
+--
+
 module Main (main) where
 
-import Lib
-import System.Environment (getArgs)
-
 import ReadAndProcess
+import System.Environment (getArgs)
 
 main :: IO ()
 main = do
