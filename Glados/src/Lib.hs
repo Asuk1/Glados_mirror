@@ -11,7 +11,7 @@ someFunc = putStrLn "someFunc"
 
 data Ast = AstInteger Int
     | AstSymbol String
-    | AstBoolean String
+    | AstBoolean Bool
     | AstCall [Ast]
     | AstDefine (Either String [String]) Ast
     | AstLambda [String] Ast deriving (Show)
