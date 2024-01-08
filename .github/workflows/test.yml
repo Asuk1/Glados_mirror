@@ -81,9 +81,9 @@ jobs:
       - name: Zip the Glados
         run: |
           cd Glados
-          zip -r glados-project-${{ github.run_number }}.zip .
           stack build --install-ghc --allow-different-user
           cp $(stack path --local-install-root)/bin/glados ./glados
+          zip -r glados-project-${{ github.run_number }}.zip .
           zip glados-${{ github.run_number }}.zip glados
           ls -l
 
