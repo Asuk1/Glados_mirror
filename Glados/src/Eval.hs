@@ -142,10 +142,11 @@ setFuncEnv :: [String] -> [Ast] -> Env -> Either Env String
 setFuncEnv (_:_) [] _ = Right "Too few arguments"
 setFuncEnv [] (_:_) _ = Right "Too many arguments"
 setFuncEnv [] [] env = Left env
-setFuncEnv (a:as) (b:bs) env = case getValue b env of
-    (Value x) -> setFuncEnv as bs (addKeyVal a (AstInteger x) env)
-    (Boolean x) -> setFuncEnv as bs (addKeyVal a (AstInteger (boolToInt x)) env)
-    (Err x) -> Right x
+setFuncEnv (x:xs) (y:ys) env =
+    case getValue y env of
+        Value s -> setFuncEnv xs ys (addKeyVal x (AstInteger s) env)
+        Boolean s -> setFuncEnv xs ys (addKeyVal x (AstInteger (boolToInt s)) env)
+        Err s -> Right s
 
 getBuiltins :: [(String, [Ast] -> Env -> Result)]
 getBuiltins = [
@@ -170,12 +171,13 @@ funcValue :: [Ast] -> Env -> Result
 funcValue [] _ = (Err "Invalid function call")
 funcValue x env = case isBuild x env of
     (Boolean False) -> case callFunc x env of
-        (Value x) -> (Value x)
-        (Boolean x) -> (Boolean x)
-        (Err x) -> (Err x)
-    (Boolean x) -> (Boolean x)
-    (Value x) -> (Value x)
-    (Err x) -> (Err x)
+        (Err err) -> (Err err)
+        (Value a) -> (Value a)
+        (Boolean a) -> (Boolean a)
+    (Boolean a) -> (Boolean a)
+    (Err err) -> (Err err)
+    _ -> (Err "Invalid function call")
+
 
 callFunc :: [Ast] -> Env -> Result
 callFunc (AstLambda a x:[]) env = case (length a) == 0 of
@@ -189,10 +191,12 @@ callFunc (AstLambda a x:b) env = case (length a) == (length b) of
 callFunc _ _ = (Err "Invalid function call")
 
 eval :: Ast -> Env -> Result
-eval (AstInteger x) _ = (Value x)
-eval (AstBoolean x) _ = (Boolean x)
+eval (AstInteger x) _ = Value x
+eval (AstBoolean x) _ = Boolean x
 eval (AstSymbol x) env = getValue (AstSymbol x) env
 eval (AstCall x) env = funcValue x env
+eval (AstDefine _ _) _ = Err "Define not supported yet"
+eval (AstLambda _ _) _ = Err "Lambda not supported yet"
 
 printEval :: [Result] -> IO ()
 printEval [] = return ()
