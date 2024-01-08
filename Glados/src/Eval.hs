@@ -135,6 +135,15 @@ boolToInt :: Bool -> Int
 boolToInt True = 1
 boolToInt False = 0
 
+setFunctionEnv :: [String] -> [Ast] -> Env -> Either Env String
+setFunctionEnv (_:_) [] _ = Right "Too few arguments"
+setFunctionEnv [] (_:_) _ = Right "Too many arguments"
+setFunctionEnv [] [] env = Left env
+setFunctionEnv (a:as) (b:bs) env = case getValue b env of
+    (Value x) -> setFunctionEnv as bs (addKeyVal a (AstInteger x) env)
+    (Boolean x) -> setFunctionEnv as bs (addKeyVal a (AstInteger (boolToInt x)) env)
+    (Err x) -> Right x
+
 callFunc :: [Ast] -> Env -> Result
 -- lambda call
 callFunc (AstLambda a e:b) env = case (length a) == (length b) of
