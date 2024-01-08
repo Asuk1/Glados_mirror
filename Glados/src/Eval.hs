@@ -131,17 +131,20 @@ ifFunction [a, b, c] env =
         _ -> Err "Error in if: First argument must be a boolean condition."
 ifFunction _ _ = Err "Error in if: Insufficient arguments."
 
+addKeyVal :: String -> Ast -> Env -> Env
+addKeyVal key val env = (key, val):env
+
 boolToInt :: Bool -> Int
 boolToInt True = 1
 boolToInt False = 0
 
-setFunctionEnv :: [String] -> [Ast] -> Env -> Either Env String
-setFunctionEnv (_:_) [] _ = Right "Too few arguments"
-setFunctionEnv [] (_:_) _ = Right "Too many arguments"
-setFunctionEnv [] [] env = Left env
-setFunctionEnv (a:as) (b:bs) env = case getValue b env of
-    (Value x) -> setFunctionEnv as bs (addKeyVal a (AstInteger x) env)
-    (Boolean x) -> setFunctionEnv as bs (addKeyVal a (AstInteger (boolToInt x)) env)
+setFuncEnv :: [String] -> [Ast] -> Env -> Either Env String
+setFuncEnv (_:_) [] _ = Right "Too few arguments"
+setFuncEnv [] (_:_) _ = Right "Too many arguments"
+setFuncEnv [] [] env = Left env
+setFuncEnv (a:as) (b:bs) env = case getValue b env of
+    (Value x) -> setFuncEnv as bs (addKeyVal a (AstInteger x) env)
+    (Boolean x) -> setFuncEnv as bs (addKeyVal a (AstInteger (boolToInt x)) env)
     (Err x) -> Right x
 
 callFunc :: [Ast] -> Env -> Result
@@ -152,3 +155,8 @@ callFunc (AstLambda a e:b) env = case (length a) == (length b) of
         (Err "e") -> (Err ("Error in lambda: incorrect return type"))
         x -> x
 callFunc _ _ = (Err "Invalid function call")
+
+eval :: Ast -> Env -> Result
+eval (AstInteger a) _ = (Value a)
+eval (AstBoolean a) _ = (Boolean a)
+eval (AstSymbol a) env = getValue (AstSymbol a) env
