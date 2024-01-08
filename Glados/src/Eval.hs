@@ -147,16 +147,49 @@ setFuncEnv (a:as) (b:bs) env = case getValue b env of
     (Boolean x) -> setFuncEnv as bs (addKeyVal a (AstInteger (boolToInt x)) env)
     (Err x) -> Right x
 
+getBuiltins :: [(String, [Ast] -> Env -> Result)]
+getBuiltins = [
+    ("+", add),
+    ("-", sub),
+    ("*", mult),
+    ("<", inferior),
+    ("/", division),
+    ("%", modulo),
+    ("=", equal),
+    ("if", ifFunction)
+    ]
+
+isBuild :: [Ast] -> Env -> Result
+isBuild [] _ = (Boolean False)
+isBuild (AstSymbol a:b) env = case lookup a getBuiltins of
+                    Nothing -> Boolean False
+                    Just ab -> ab b env
+isBuild _ _ = Err "Bad call"
+
+funcValue :: [Ast] -> Env -> Result
+funcValue [] _ = (Err "Invalid function call")
+funcValue x env = case isBuild x env of
+    (Boolean False) -> case callFunc x env of
+        (Value x) -> (Value x)
+        (Boolean x) -> (Boolean x)
+        (Err x) -> (Err x)
+    (Boolean x) -> (Boolean x)
+    (Value x) -> (Value x)
+    (Err x) -> (Err x)
+
 callFunc :: [Ast] -> Env -> Result
--- lambda call
-callFunc (AstLambda a e:b) env = case (length a) == (length b) of
-    False -> (Err ("Calling lambda with incorrect number of arguments")) -- check args nbr
-    True -> case eval e env of
-        (Err "e") -> (Err ("Error in lambda: incorrect return type"))
-        x -> x
+callFunc (AstLambda a x:[]) env = case (length a) == 0 of
+    False -> (Err ("Incorrect Lambda call"))
+    True -> eval x env
+callFunc (AstLambda a x:b) env = case (length a) == (length b) of
+    False -> (Err ("Incorrect Lambda call"))
+    True -> case setFuncEnv a b env of
+        Left envi -> eval x envi
+        Right err -> (Err err)
 callFunc _ _ = (Err "Invalid function call")
 
 eval :: Ast -> Env -> Result
-eval (AstInteger a) _ = (Value a)
-eval (AstBoolean a) _ = (Boolean a)
-eval (AstSymbol a) env = getValue (AstSymbol a) env
+eval (AstInteger x) _ = (Value x)
+eval (AstBoolean x) _ = (Boolean x)
+eval (AstSymbol x) env = getValue (AstSymbol x) env
+eval (AstCall x) env = funcValue x env
