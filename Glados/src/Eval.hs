@@ -193,3 +193,7 @@ eval (AstInteger x) _ = (Value x)
 eval (AstBoolean x) _ = (Boolean x)
 eval (AstSymbol x) env = getValue (AstSymbol x) env
 eval (AstCall x) env = funcValue x env
+
+printEval :: [Result] -> IO ()
+printEval [] = return ()
+printEval (x:xs) = putStrLn (show x) >> printEval xs
