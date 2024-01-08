@@ -15,6 +15,7 @@ module Eval
         modulo,
         equal,
         ifFunction,
+        callFunc,
         Result (..),
     ) where
 
@@ -32,9 +33,6 @@ instance Show Result where
     show (Value x) = "Value " ++ show x
     show (Boolean s) = "Bool " ++ show s
     show (Err s) = "Err " ++ show s
-
-
-
 
 getValue :: Ast -> Env -> Result
 getValue (AstInteger a) _ = Value a
@@ -133,3 +131,15 @@ ifFunction [a, b, c] env =
         _ -> Err "Error in if: First argument must be a boolean condition."
 ifFunction _ _ = Err "Error in if: Insufficient arguments."
 
+boolToInt :: Bool -> Int
+boolToInt True = 1
+boolToInt False = 0
+
+callFunc :: [Ast] -> Env -> Result
+-- lambda call
+callFunc (AstLambda a e:b) env = case (length a) == (length b) of
+    False -> (Err ("Calling lambda with incorrect number of arguments")) -- check args nbr
+    True -> case eval e env of
+        (Err "e") -> (Err ("Error in lambda: incorrect return type"))
+        x -> x
+callFunc _ _ = (Err "Invalid function call")
