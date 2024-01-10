@@ -5,6 +5,17 @@
 -- Vm
 --
 
+module Vm (
+    Op(..),
+    Value(..),
+    Instruction(..),
+    Env,
+    opToFunction,
+    performOperation,
+    executeInstruction,
+    exec,
+    ) where
+
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
 data Op = Add | Sub | Mul | Div | Less deriving (Show, Eq)
 data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String deriving (Show, Eq)
@@ -59,7 +70,7 @@ executeInstruction (PushEnv name) stack _ env =
         Nothing -> Left "Error: Variable not found"
 
 performOperation :: (Int -> Int -> Int) -> Stack -> Either String Stack
-performOperation op (VInt a : VInt b : stack) = Right (VInt (op b a) : stack)
+performOperation op (VInt a : VInt b : stack) = Right (VInt (op a b) : stack)
 performOperation _ [] = Left "Error: Not enough arguments on stack"
 performOperation _ _ = Left "Error: Invalid arguments on stack"
 
