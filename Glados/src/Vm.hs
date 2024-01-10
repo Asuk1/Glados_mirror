@@ -1,8 +1,7 @@
 --
 -- EPITECH PROJECT, 2024
 -- Glados_mirror
--- File description:
--- Vm
+-- File description: Vm
 --
 
 module Vm (
@@ -21,22 +20,6 @@ data Op = Add | Sub | Mul | Div | Less deriving (Show, Eq)
 data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String deriving (Show, Eq)
 type Stack = [Value]
 type Env = [(String, Value)]
-
-absCode :: [Instruction]
-absCode =
-    [ PushArg 0
-    , Push (VInt 0)
-    , Push (VOp Less)
-    , Call
-    , JumpIfFalse 2
-    , PushArg 0
-    , Ret
-    , PushArg 0
-    , Push (VInt (-1))
-    , Push (VOp Mul)
-    , Call
-    , Ret
-    ]
 
 opToFunction :: Op -> (Int -> Int -> Int)
 opToFunction Add = (+)
@@ -82,11 +65,28 @@ exec instructions stack args env ip
             Right (newStack, offset) -> exec instructions newStack args env (ip + offset)
             Left errorMsg -> Left errorMsg
 
+absCode :: [Instruction]
+absCode =
+    [ PushArg 0
+    , Push (VInt 0)
+    , Push (VOp Less)
+    , Call
+    , JumpIfFalse 2
+    , PushArg 0
+    , Ret
+    , PushArg 0
+    , Push (VInt (-1))
+    , Push (VOp Mul)
+    , Call
+    , Ret
+    ]
+
 main :: IO ()
 main = do
-    let env = [("fact", VFunc absCode)]
-        absCode = [PushEnv "fact", PushArg 0, Push (VInt 1), Push (VOp Less), Call, JumpIfFalse 2, PushArg 0, Ret, PushArg 0, Push (VInt (-1)), Push (VOp Mul), Call, Ret]
-        args = [VInt 5]
+    let env = [("abs", VFunc absCode)]
+        args = [VInt (-42)]
     case exec absCode [] args env 0 of
-        Right resultStack -> print resultStack
+        Right resultStack -> case resultStack of
+            (VInt result : _) -> print result
+            _ -> putStrLn "Error: Invalid result on stack"
         Left errorMsg -> putStrLn errorMsg
