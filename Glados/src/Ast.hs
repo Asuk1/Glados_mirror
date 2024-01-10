@@ -6,10 +6,12 @@
 --
 
 module Ast (
+    Ast(..),
     getSymbol,
     getInteger,
     getList,
     printTree,
+    cptToAST,
     cptListToAst,
 ) where
 
@@ -21,7 +23,7 @@ data Ast = AstInteger Int
     | AstBoolean String
     | AstCall [Ast]
     | AstDefine (Either String [String]) Ast
-    | AstLambda [String] Ast deriving (Show)
+    | AstLambda [String] Ast deriving (Show, Eq)
 
 getSymbol :: Cpt -> Maybe String
 getSymbol (CptSymbols s) = Just s
