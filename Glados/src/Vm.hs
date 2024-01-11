@@ -15,6 +15,8 @@ module Vm (
     exec,
     ) where
 
+import Data.Maybe
+
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
 data Op = Add | Sub | Mul | Div | Less deriving (Show, Eq)
 data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String deriving (Show, Eq)
@@ -65,27 +67,36 @@ exec instructions stack args env ip
             Right (newStack, offset) -> exec instructions newStack args env (ip + offset)
             Left errorMsg -> Left errorMsg
 
-absCode :: [Instruction]
-absCode =
-    [ PushArg 0
-    , Push (VInt 0)
-    , Push (VOp Less)
-    , Call
-    , JumpIfFalse 2
-    , PushArg 0
-    , Ret
-    , PushArg 0
-    , Push (VInt (-1))
-    , Push (VOp Mul)
-    , Call
-    , Ret
-    ]
+parseInstruction :: String -> Maybe Instruction
+parseInstruction line = case words line of
+    ("Push" : "VInt" : n : []) -> Just $ Push (VInt (read n))
+    ("Push" : "VBool" : b : []) -> Just $ Push (VBool (read b))
+    ("Push" : "VOp" : op : []) -> Just $ Push (VOp (parseOp op))
+    ("Pop" : []) -> Just Pop
+    ("Call" : []) -> Just Call
+    ("Ret" : []) -> Just Ret
+    ("JumpIfFalse" : offset : []) -> Just $ JumpIfFalse (read offset)
+    ("PushArg" : index : []) -> Just $ PushArg (read index)
+    ("PushEnv" : name : []) -> Just $ PushEnv name
+    _ -> Nothing
 
-main :: IO ()
-main = do
-    let env = [("abs", VFunc absCode)]
-        args = [VInt (-42)]
-    case exec absCode [] args env 0 of
+parseOp :: String -> Op
+parseOp op = case op of
+    "Add" -> Add
+    "Sub" -> Sub
+    "Mul" -> Mul
+    "Div" -> Div
+    "Less" -> Less
+    _ -> error "Unknown operation"
+
+main' :: String -> IO ()
+main' filePath = do
+    contents <- readFile filePath
+    let linesOfFile = lines contents
+    let instructions = mapMaybe parseInstruction linesOfFile
+    let initialStack = [VInt (-42)]
+    let env = [("abs", VInt 42)]
+    case exec instructions initialStack [] env 0 of
         Right resultStack -> case resultStack of
             (VInt result : _) -> print result
             _ -> putStrLn "Error: Invalid result on stack"
