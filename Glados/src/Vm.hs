@@ -18,10 +18,16 @@ module Vm (
 import Data.Maybe
 
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
-data Op = Add | Sub | Mul | Div | Less deriving (Show, Eq)
-data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String deriving (Show, Eq)
+data Op = Add | Sub | Mul | Div | Less| Fact | Equal deriving (Show, Eq)
+data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String | Define deriving (Show, Eq)
 type Stack = [Value]
 type Env = [(String, Value)]
+data Ast = AstInteger Int
+    | AstSymbol String
+    | AstBoolean String
+    | AstCall [Ast]
+    | AstDefine (Either String [String]) Ast
+    | AstLambda [String] Ast deriving (Show, Eq)
 
 opToFunction :: Op -> (Int -> Int -> Int)
 opToFunction Add = (+)
@@ -29,8 +35,11 @@ opToFunction Sub = (-)
 opToFunction Mul = (*)
 opToFunction Div = div
 opToFunction Less = \a b -> if a < b then 1 else 0
+opToFunction Equal = \a b -> if a == b then 1 else 0
+opToFunction Fact = \a _ -> if a <= 1 then 1 else a * opToFunction Fact (a - 1) 1
 
 executeInstruction :: Instruction -> Stack -> [Value] -> Env -> Either String (Stack, Int)
+executeInstruction Define stack _ _ = Right (stack, 1)
 executeInstruction (Push value) stack _ _ = Right (value : stack, 1)
 executeInstruction Pop [] _ _ = Left "Error: Not enough arguments on stack"
 executeInstruction Pop (_:stack) _ _ = Right (stack, 1)
@@ -87,17 +96,48 @@ parseOp op = case op of
     "Mul" -> Mul
     "Div" -> Div
     "Less" -> Less
+    "Fact" -> Fact
+    "Equal" -> Equal
     _ -> error "Unknown operation"
 
-main' :: String -> IO ()
-main' filePath = do
-    contents <- readFile filePath
-    let linesOfFile = lines contents
-    let instructions = mapMaybe parseInstruction linesOfFile
-    let initialStack = [VInt (-42)]
-    let env = [("abs", VInt 42)]
-    case exec instructions initialStack [] env 0 of
-        Right resultStack -> case resultStack of
-            (VInt result : _) -> print result
-            _ -> putStrLn "Error: Invalid result on stack"
-        Left errorMsg -> putStrLn errorMsg
+astToInstructions :: Ast -> [Instruction]
+astToInstructions (AstInteger n) = [Push (VInt n)]
+astToInstructions (AstSymbol s) = [PushEnv s]
+astToInstructions (AstBoolean b) = [Push (VBool (read b))]
+astToInstructions (AstCall [AstDefine (Left var) body, args]) =
+    [PushEnv var] ++ astToInstructions body ++ [Define] ++ astToInstructions args ++ [Call]
+astToInstructions (AstCall [AstSymbol name, arg1, arg2]) =
+    [PushEnv name] ++ astToInstructions arg1 ++ astToInstructions arg2 ++ [Call]
+astToInstructions (AstCall [AstLambda argList body, args]) =
+    astToInstructions (AstCall [AstDefine (Right argList) body, args])
+astToInstructions (AstCall astList) = concatMap astToInstructions astList
+astToInstructions (AstDefine (Right argList) body) =
+    astToInstructions (AstCall [AstDefine (Right argList) body])
+astToInstructions (AstLambda argList body) =
+    [Push (VFunc (astToInstructions (AstCall [AstDefine (Right argList) body])))]
+
+-- main' :: String -> IO ()
+-- main' filePath = do
+--     contents <- readFile filePath
+--     putStrLn "Contenu du fichier :"
+--     putStrLn contents
+--     let linesOfFile = lines contents
+--     let instructions = mapMaybe parseInstruction linesOfFile
+--     putStrLn "Instructions lues du fichier :"
+--     mapM_ print instructions
+--     let initialStack = [VInt (-42)]
+--     let env = [("abs", VInt 42)]
+--     case exec instructions initialStack [] env 0 of
+--         Right resultStack -> case resultStack of
+--             (VInt result : _) -> print result
+--             _ -> putStrLn "Error: Invalid result on stack"
+--         Left errorMsg -> putStrLn errorMsg
+
+main :: IO ()
+main = do
+    let exampleAst = AstCall [AstDefine (Left "add") (AstCall [AstSymbol "lambda",AstCall [AstSymbol "a",AstSymbol "b"],AstCall [AstSymbol "+",AstSymbol "a",AstSymbol "b"]]),AstCall [AstSymbol "add",AstInteger 3,AstInteger 4]]
+
+    let instructions = astToInstructions exampleAst
+
+    putStrLn "Instructions générées à partir de l'AST :"
+    mapM_ print instructions
