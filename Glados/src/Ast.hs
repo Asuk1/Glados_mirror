@@ -81,4 +81,4 @@ cptListToAstList (x:xs) =
       case cptListToAstList xs of
         Just astList -> Just (ast : astList)
         Nothing -> Nothing
-    Nothing -> Nothing
+    Nothing -> error "Syntax Error"
