@@ -16,6 +16,10 @@ module Vm (
     ) where
 
 import Data.Maybe
+import Data.Binary (encodeFile)
+import Control.Monad (forM_)
+import Data.Binary.Put (Put, runPut, putWord8, putWord32le)
+import qualified Data.ByteString.Lazy as BL
 
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
 data Op = Add | Sub | Mul | Div | Less| Fact | Equal deriving (Show, Eq)
@@ -133,11 +137,50 @@ astToInstructions (AstLambda argList body) =
 --             _ -> putStrLn "Error: Invalid result on stack"
 --         Left errorMsg -> putStrLn errorMsg
 
+instructionToOpcode :: Instruction -> Put
+instructionToOpcode (Push value) = do
+    putWord8 0x01
+    valueToOpcode value
+instructionToOpcode Pop = putWord8 0x02
+instructionToOpcode Call = putWord8 0x03
+instructionToOpcode Ret = putWord8 0x04
+instructionToOpcode (JumpIfFalse offset) = do
+    putWord8 0x07
+    putWord32le $ fromIntegral offset
+instructionToOpcode (PushArg index) = do
+    putWord8 0x08
+    putWord32le $ fromIntegral index
+instructionToOpcode (PushEnv name) = do
+    putWord8 0x09
+    putWord32le $ fromIntegral (length name)
+    mapM_ putWord8 (map (fromIntegral . fromEnum) name)
+instructionToOpcode Define = putWord8 0x0A
+
+valueToOpcode :: Value -> Put
+valueToOpcode (VInt n) = do
+    putWord8 0x05
+    putWord32le $ fromIntegral n
+valueToOpcode (VBool b) = do
+    putWord8 0x06
+    putWord8 $ if b then 0xFF else 0x00
+
+instructionsToBytecode :: [Instruction] -> Put
+instructionsToBytecode instrs = forM_ instrs instructionToOpcode
+
+writeBytecodeToFile :: FilePath -> Put -> IO ()
+writeBytecodeToFile filePath bytecodePut = encodeFile filePath (runPut bytecodePut)
+
 main :: IO ()
 main = do
     let exampleAst = AstCall [AstDefine (Left "add") (AstCall [AstSymbol "lambda",AstCall [AstSymbol "a",AstSymbol "b"],AstCall [AstSymbol "+",AstSymbol "a",AstSymbol "b"]]),AstCall [AstSymbol "add",AstInteger 3,AstInteger 4]]
 
     let instructions = astToInstructions exampleAst
-
-    putStrLn "Instructions générées à partir de l'AST :"
+    putStrLn "Instructions generated from the AST:"
     mapM_ print instructions
+    putStrLn "\nBytecode generated:"
+    let bytecode = runPut $ instructionsToBytecode instructions
+    BL.putStr bytecode
+    putStrLn ""
+    let outputFilePath = "vm_bytecode.bin"
+    writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
+    putStrLn $ "Bytecode written to file: " ++ outputFilePath
