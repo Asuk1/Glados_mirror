@@ -314,13 +314,13 @@ testGetSymbol = do
 
 spec :: Spec
 spec = do
-    -- testAddFunction
-    -- testSubFunction
-    -- testMultFunction
-    -- testDivFunction
-    -- testModFunction
-    -- testInferiorFunction
-    -- testEqualFunction
-    -- testIfFunction
+    testAddFunction
+    testSubFunction
+    testMultFunction
+    testDivFunction
+    testModFunction
+    testInferiorFunction
+    testEqualFunction
+    testIfFunction
     testGetSymbol
 
