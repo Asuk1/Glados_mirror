@@ -356,7 +356,7 @@ testDefineSymbol = do
             let env = [("a", AstInteger 5)]
             defineSymbol (Left "b") (AstInteger 10) env `shouldBe` EnvRes [("b", AstInteger 10), ("a", AstInteger 5)]
         it "should handle Left case with invalid assignment" $ do
-            let env = [("a", AstDefine (Right ["x"]) (AstSymbol "x"))]  -- Fix the argument here
+            let env = [("a", AstDefine (Right ["x"]) (AstSymbol "x"))]
             defineSymbol (Left "a") (AstInteger 10) env `shouldBe` EnvRes [("a",AstInteger 10)]
         it "should handle Right case with empty parameters" $ do
             let env = [("a", AstInteger 5)]
@@ -367,8 +367,6 @@ testDefineSymbol = do
         it "should handle Left case with function assignment" $ do
             let env = [("a", AstDefine (Right ["x"]) (AstSymbol "x"))]
             defineSymbol (Left "a") (AstDefine (Right ["y"]) (AstSymbol "y")) env `shouldBe` ErrRes "Cannot assign to symbol 'a'. Functions cannot be assigned directly."
-
-
 
 
 testAddKeyVal :: Spec
@@ -416,8 +414,6 @@ testSetFunctionInEnv = do
             let env = [("x", AstBoolean True)]
             setFunctionInEnv ["y"] [AstSymbol "Invalid expression"] env `shouldBe` Right "Invalid expression is not in the environment."
 
-
-
 testCallFunction :: Spec
 testCallFunction = do
     describe "callFunction" $ do
@@ -459,11 +455,6 @@ testCallFunc = do
             callFunc [AstSymbol "func", AstBoolean True] env `shouldBe` BoolFunc True
 
 
-
-
-
-
-
 testIsBuild :: Spec
 testIsBuild = do
     describe "isBuild" $ do
@@ -474,7 +465,6 @@ testIsBuild = do
             isBuild [AstSymbol "unknown"] [] `shouldBe` Left "Function not found"
         it "should return Error 'Invalid function call.' for invalid function" $ do
             isBuild [AstInteger 1] [] `shouldBe` Left "Invalid function call."
-
 
 testCallUserFunction :: Spec
 testCallUserFunction = do
@@ -515,7 +505,6 @@ testFunctionValue = do
             let env = [("x", AstInteger 5)]
             functionValue [AstSymbol "unknown"] env `shouldBe` ErrRes "unknown is not in the environment."
 
-
 testEval :: Spec
 testEval = do
     describe "eval" $ do
@@ -538,44 +527,44 @@ testEval = do
         it "should return ExprRes for AstLambda" $ do
             eval (AstLambda ["x", "y"] (AstCall [AstSymbol "+", AstSymbol "x", AstSymbol "y"])) [] `shouldBe` ExprRes "lambda"
 
-
-
 testEvalBasicFunc :: Spec
 testEvalBasicFunc = do
     describe "eval basic function" $ do
         it "should call add with myAdd function 2 positive int" $ do
             let env = [("myAdd", AstLambda ["x", "y"] (AstCall [AstSymbol "+", AstSymbol "x", AstSymbol "y"]))]
             eval (AstCall [AstSymbol "myAdd", AstInteger 5, AstInteger 7]) env `shouldBe` IntRes 12
-        it "should call add with myAdd function 2 negative int" $ do
-            let env = [("myAdd", AstLambda ["x", "y"] (AstCall [AstSymbol "+", AstSymbol "x", AstSymbol "y"]))]
-            eval (AstCall [AstSymbol "myAdd", AstInteger (-5), AstInteger (-7)]) env `shouldBe` IntRes (-12)
-        it "should call add with myAdd function 1 negative and 1 positive int" $ do
-            let env = [("myAdd", AstLambda ["x", "y"] (AstCall [AstSymbol "+", AstSymbol "x", AstSymbol "y"]))]
-            eval (AstCall [AstSymbol "myAdd", AstInteger (-5), AstInteger 7]) env `shouldBe` IntRes 2
-        it "should call add with myAdd function 1 positive and 1 negative int" $ do
-            let env = [("myAdd", AstLambda ["x", "y"] (AstCall [AstSymbol "+", AstSymbol "x", AstSymbol "y"]))]
-            eval (AstCall [AstSymbol "myAdd", AstInteger 5, AstInteger (-7)]) env `shouldBe` IntRes (-2)
-
-
         it "should call add with mySub function 2 positive int" $ do
             let env = [("mySub", AstLambda ["x", "y"] (AstCall [AstSymbol "-", AstSymbol "x", AstSymbol "y"]))]
             eval (AstCall [AstSymbol "mySub", AstInteger 5, AstInteger 7]) env `shouldBe` IntRes (-2)
-        it "should call add with mySub function 2 negative int" $ do
-            let env = [("mySub", AstLambda ["x", "y"] (AstCall [AstSymbol "-", AstSymbol "x", AstSymbol "y"]))]
-            eval (AstCall [AstSymbol "mySub", AstInteger (-5), AstInteger (-7)]) env `shouldBe` IntRes 2
-        it "should call add with mySub function 1 negative and 1 positive int" $ do
-            let env = [("mySub", AstLambda ["x", "y"] (AstCall [AstSymbol "-", AstSymbol "x", AstSymbol "y"]))]
-            eval (AstCall [AstSymbol "mySub", AstInteger (-5), AstInteger 7]) env `shouldBe` IntRes (-12)
-        it "should call add with mySub function 1 positive and 1 negative int" $ do
-            let env = [("mySub", AstLambda ["x", "y"] (AstCall [AstSymbol "-", AstSymbol "x", AstSymbol "y"]))]
-            eval (AstCall [AstSymbol "mySub", AstInteger 5, AstInteger (-7)]) env `shouldBe` IntRes 12
-
-
+        it "should call add with myMult function 2 positive int" $ do
+            let env = [("myMult", AstLambda ["x", "y"] (AstCall [AstSymbol "*", AstSymbol "x", AstSymbol "y"]))]
+            eval (AstCall [AstSymbol "myMult", AstInteger 7, AstInteger 5]) env `shouldBe` IntRes 35
+        it "should call add with myDiv function 2 positive int" $ do
+            let env = [("myDiv", AstLambda ["x", "y"] (AstCall [AstSymbol "div", AstSymbol "x", AstSymbol "y"]))]
+            eval (AstCall [AstSymbol "myDiv", AstInteger 10, AstInteger 2]) env `shouldBe` IntRes 5
+        it "should call add with myMod function 2 positive int" $ do
+            let env = [("myMod", AstLambda ["x", "y"] (AstCall [AstSymbol "mod", AstSymbol "x", AstSymbol "y"]))]
+            eval (AstCall [AstSymbol "myMod", AstInteger 7, AstInteger 5]) env `shouldBe` IntRes 2
+        it "should evaluate ifFunction with true condition" $ do
+            let env = [("myIf", AstLambda ["condition", "thenExpr", "elseExpr"] (AstCall [AstSymbol "if", AstSymbol "condition", AstSymbol "thenExpr", AstSymbol "elseExpr"]))]
+            eval (AstCall [AstSymbol "myIf", AstBoolean True, AstInteger 42, AstInteger 0]) env `shouldBe` IntRes 42
+        it "should evaluate ifFunction with false condition" $ do
+            let env = [("myIf", AstLambda ["condition", "thenExpr", "elseExpr"] (AstCall [AstSymbol "if", AstSymbol "condition", AstSymbol "thenExpr", AstSymbol "elseExpr"]))]
+            eval (AstCall [AstSymbol "myIf", AstBoolean False, AstInteger 42, AstInteger 0]) env `shouldBe` IntRes 0
+        it "should evaluate inferior function" $ do
+            let env = [("myLessThan", AstLambda ["x", "y"] (AstCall [AstSymbol "<", AstSymbol "x", AstSymbol "y"]))]
+            eval (AstCall [AstSymbol "myLessThan", AstInteger 5, AstInteger 7]) env `shouldBe` BoolRes True
+            eval (AstCall [AstSymbol "myLessThan", AstInteger 7, AstInteger 5]) env `shouldBe` BoolRes False
+        it "should evaluate equal function" $ do
+            let env = [("myEqual", AstLambda ["x", "y"] (AstCall [AstSymbol "eq?", AstSymbol "x", AstSymbol "y"]))]
+            eval (AstCall [AstSymbol "myEqual", AstInteger 5, AstInteger 5]) env `shouldBe` BoolRes True
+            eval (AstCall [AstSymbol "myEqual", AstInteger 5, AstInteger 7]) env `shouldBe` BoolRes False
 
 
 
 spec :: Spec
 spec = do
+    -- Check Mandatory function
     testAddFunction
     testSubFunction
     testMultFunction
@@ -585,26 +574,28 @@ spec = do
     testEqualFunction
     testIfFunction
 
+    -- Check AstDefine
     testGetSymbol
     testAddOrReplaceKey
     testHandleFunctionBody
     testHandleDefinedSymbolName
     testDefineSymbol
 
+    -- Check AstCall user function
     testAddKeyVal
     testSetFunctionInEnv
     testCallFunction
     testFuncCall
     testCallFunc
 
+    -- Check AstCall user function
     testIsBuild
     testCallUserFunction
     testCallBuildFunction
     testFunctionValue
 
+    -- Check Eval (main function of Evaluation)
     testEval
 
+    -- Check all basic function from isBuild function
     testEvalBasicFunc
-
-    -- advancedFunction
-

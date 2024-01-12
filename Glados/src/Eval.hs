@@ -41,7 +41,7 @@ module Eval
 import Lib
 
 data Function = IntFunc Int | BoolFunc Bool | ErrFunc String
-data Result = IntRes Int | EnvRes { getEnv :: Env }| BoolRes Bool | ExprRes String | ErrRes String
+data Result = IntRes Int | EnvRes Env | BoolRes Bool | ExprRes String | ErrRes String
 
 
 instance Eq Function where
