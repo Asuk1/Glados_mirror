@@ -45,10 +45,28 @@ processLine :: String -> IO ()
 processLine line = do
     if null line
         then putStrLn "Please write something"
-        else putStrLn $ show $ cptListToAst $ tokenToCpt $ stringToToken line
+        else do
+            let tokens = ("(" : stringToToken line)
+            let (open, close) = checkParenthesis tokens
+            if open == close
+                then case cptListToAstList (tokenToCpt tokens) of
+                        Just astList -> do
+                            putStrLn $ show astList
+                            writeAstListToFile "ast_result.txt" astList
+                        Nothing -> putStrLn "Syntax Error"
+                else error "Syntax Error"
 
 processContent :: String -> IO ()
 processContent content = do
     if null content
         then putStrLn "Please write something"
-        else putStrLn $ show $ cptListToAst $ tokenToCpt $ stringToToken content
+        else do
+            let tokens = ("(" : stringToToken content)
+            let (open, close) = checkParenthesis tokens
+            if open == close
+                then case cptListToAstList (tokenToCpt tokens) of
+                        Just astList -> do
+                            putStrLn $ show astList
+                            writeAstListToFile "ast_result.txt" astList
+                        Nothing -> putStrLn "Syntax Error"
+                else error "Syntax Error"
