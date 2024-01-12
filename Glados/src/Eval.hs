@@ -16,6 +16,10 @@ module Eval
         equal,
         ifFunction,
         getSymbol,
+        addOrReplaceKey,
+        handleFunctionBody,
+        handleDefinedSymbolName,
+        defineSymbol,
         -- callFunc,
         Function (..),
         Result (..),
@@ -222,8 +226,28 @@ ifFunction _ _ = ErrFunc "Error in if: Insufficient arguments."
 
 
 
+addOrReplaceKey :: String -> Ast -> Env -> Env
+addOrReplaceKey key val env = (key, val) : filter (\(k, _) -> k /= key) env
 
+handleFunctionBody :: String -> Ast -> Env -> Result
+handleFunctionBody a body env =
+    case eval body env of
+        ErrRes err -> ErrRes err
+        IntRes val -> EnvRes (addOrReplaceKey a (AstInteger val) env)
+        BoolRes val -> EnvRes (addOrReplaceKey a (AstBoolean val) env)
+        ExprRes _ -> EnvRes (addOrReplaceKey a body env)
 
+handleDefinedSymbolName :: String -> [String] -> Ast -> Env -> Result
+handleDefinedSymbolName a params body env =
+    EnvRes (addOrReplaceKey a (AstDefine (Right params) body) env)
+
+defineSymbol :: Either String [String] -> Ast -> Env -> Result
+defineSymbol (Left a) body env =
+    case body of
+        AstDefine _ _ -> ErrRes ("Cannot assign to symbol '" ++ a ++ "'. Functions cannot be assigned directly.")
+        _ -> handleFunctionBody a body env
+defineSymbol (Right []) _ _ = ErrRes "Symbol name is not defined."
+defineSymbol (Right (a:params)) body env = handleDefinedSymbolName a params body env
 
 
 
@@ -233,11 +257,11 @@ ifFunction _ _ = ErrFunc "Error in if: Insufficient arguments."
 
 
 eval :: Ast -> Env -> Result
-eval (AstInteger a) _ = (IntRes a)
-eval (AstBoolean a) _ = (BoolRes a)
-eval (AstSymbol a) env = getSymbol a env
+eval (AstInteger x) _ = (IntRes x)
+eval (AstBoolean x) _ = (BoolRes x)
+eval (AstSymbol x) env = getSymbol x env
 eval (AstCall _) _ = ErrRes "Call not supported yet"
-eval (AstDefine _ _) _ = ErrRes "Define not supported yet"
+eval (AstDefine x xs) env = defineSymbol x xs env
 eval (AstLambda _ _) _ = ErrRes "Lambda not supported yet"
 
 
