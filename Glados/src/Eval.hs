@@ -10,194 +10,227 @@ module Eval
         add,
         sub,
         mult,
-        inferior,
         division,
         modulo,
+        inferior,
         equal,
         ifFunction,
-        callFunc,
+        getSymbol,
+        -- callFunc,
+        Function (..),
         Result (..),
     ) where
 
 import Lib
 
-data Result = Value Int | Boolean Bool | Err String
+data Function = IntFunc Int | BoolFunc Bool | ErrFunc String
+data Result = IntRes Int | EnvRes { getEnv :: Env }| BoolRes Bool | ExprRes String | ErrRes String
+
+
+instance Eq Function where
+    (IntFunc x) == (IntFunc y) = x == y
+    (BoolFunc s1) == (BoolFunc s2) = s1 == s2
+    (ErrFunc e1) == (ErrFunc e2) = e1 == e2
+    _ == _ = False
+
+instance Show Function where
+    show (IntFunc x) = "IntFunc " ++ show x
+    show (BoolFunc s) = "Bool " ++ show s
+    show (ErrFunc s) = "ErrFunc " ++ show s
+
 
 instance Eq Result where
-    (Value x) == (Value y) = x == y
-    (Boolean s1) == (Boolean s2) = s1 == s2
-    (Err e1) == (Err e2) = e1 == e2
+    (EnvRes n1) == (EnvRes n2) = n1 == n2
+    (IntRes n1) == (IntRes n2) = n1 == n2
+    (BoolRes n1) == (BoolRes n2) = n1 == n2
+    (ExprRes n1) == (ExprRes n2) = n1 == n2
+    (ErrRes n1) == (ErrRes n2) = n1 == n2
     _ == _ = False
 
 instance Show Result where
-    show (Value x) = "Value " ++ show x
-    show (Boolean s) = "Bool " ++ show s
-    show (Err s) = "Err " ++ show s
-
-getValue :: Ast -> Env -> Result
-getValue (AstInteger a) _ = Value a
-getValue (AstBoolean a) _ = Boolean a
-getValue (AstSymbol s) env =
-    case lookup s env of
-        Just value -> getValue value env
-        Nothing -> Err ("Symbol '" ++ s ++ "' not found in the environment.")
-getValue _ _ = Err "Error: Unsupported expression type"
+    show (IntRes n) = show n
+    show (EnvRes n) = show n
+    show (BoolRes n) = show n
+    show (ExprRes n) = n
+    show (ErrRes n) = n
 
 
 
-add :: [Ast] -> Env -> Result
+
+
+
+-- getValue :: Ast -> Env -> Function
+-- getValue (AstInteger a) _ = IntFunc a
+-- getValue (AstBoolean a) _ = BoolFunc a
+-- getValue (AstSymbol s) env =
+--     case lookup s env of
+--         Just value -> getValue value env
+--         Nothing -> ErrFunc ("Symbol '" ++ s ++ "' not found in the environment.")
+-- getValue _ _ = ErrFunc "Error: Unsupported expression type"
+
+
+-- addKeyVal :: String -> Ast -> Env -> Env
+-- addKeyVal key val env = (key, val):env
+
+-- boolToInt :: Bool -> Int
+-- boolToInt True = 1
+-- boolToInt False = 0
+
+-- setFuncEnv :: [String] -> [Ast] -> Env -> Either Env String
+-- setFuncEnv (_:_) [] _ = Right "Too few arguments"
+-- setFuncEnv [] (_:_) _ = Right "Too many arguments"
+-- setFuncEnv [] [] env = Left env
+-- setFuncEnv (x:xs) (y:ys) env =
+--     case getValue y env of
+--         IntFunc s -> setFuncEnv xs ys (addKeyVal x (AstInteger s) env)
+--         BoolFunc s -> setFuncEnv xs ys (addKeyVal x (AstInteger (boolToInt s)) env)
+--         ErrFunc s -> Right s
+
+-- getBuiltins :: [(String, [Ast] -> Env -> Function)]
+-- getBuiltins = [
+--     ("+", add),
+--     ("-", sub),
+--     ("*", mult),
+--     ("<", inferior),
+--     ("/", division),
+--     ("%", modulo),
+--     ("=", equal),
+--     ("if", ifFunction)
+--     ]
+
+-- isBuild :: [Ast] -> Env -> Function
+-- isBuild [] _ = (BoolFunc False)
+-- isBuild (AstSymbol a:b) env = case lookup a getBuiltins of
+--                     Nothing -> BoolFunc False
+--                     Just ab -> ab b env
+-- isBuild _ _ = ErrFunc "Bad call"
+
+-- funcValue :: [Ast] -> Env -> Function
+-- funcValue [] _ = (ErrFunc "Invalid function call")
+-- funcValue x env = case isBuild x env of
+--     (BoolFunc False) -> case callFunc x env of
+--         (ErrFunc err) -> (ErrFunc err)
+--         (IntFunc a) -> (IntFunc a)
+--         (BoolFunc a) -> (BoolFunc a)
+--     (BoolFunc a) -> (BoolFunc a)
+--     (ErrFunc err) -> (ErrFunc err)
+--     _ -> (ErrFunc "Invalid function call")
+
+
+-- callFunc :: [Ast] -> Env -> Function
+-- callFunc (AstLambda a x:[]) env = case (length a) == 0 of
+--     False -> (ErrFunc ("Incorrect Lambda call"))
+--     True -> eval x env
+-- callFunc (AstLambda a x:b) env = case (length a) == (length b) of
+--     False -> (ErrFunc ("Incorrect Lambda call"))
+--     True -> case setFuncEnv a b env of
+--         Left envi -> eval x envi
+--         Right err -> (ErrFunc err)
+-- callFunc _ _ = (ErrFunc "Invalid function call")
+
+
+
+getSymbol :: String -> Env -> Result
+getSymbol str env =
+    case lookup str env of
+        Nothing -> ErrRes (str ++ " is not in the environment")
+        Just (AstInteger value) -> IntRes value
+        Just (AstBoolean value) -> BoolRes value
+        Just (AstSymbol symbol) -> eval (AstSymbol symbol) env
+        Just (AstDefine _ _) -> ExprRes ("function define " ++ str)
+        Just (AstLambda _ _) -> ExprRes ("function define " ++ str)
+        _ -> ErrRes (str ++ " si not defined")
+getValue _ _ = ErrFunc "Error: Unsupported expression type"
+
+
+add :: [Ast] -> Env -> Function
 add [a, b] env =
-    case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Value (x + y)
-        (Err errA, Value _) -> Err ("Error in add 'a': " ++ errA)
-        (Value _, Err errB) -> Err ("Error in add 'b': " ++ errB)
-        (Err errA, Err errB) -> Err $ "Error in 'a': " ++ errA ++ ", Error in 'b': " ++ errB
-        _ -> Err "Error: Addition requires two integer values."
-add _ _ = Err "Error in add: Insufficient arguments."
+    case (eval a env, eval b env) of
+        (IntRes x, IntRes y) -> IntFunc (x + y)
+        (ErrRes errA, _) -> ErrFunc ("Error in add 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in add 'b': " ++ errB)
+        _ -> ErrFunc "Error: Addition requires two integer values."
+add _ _ = ErrFunc "Error in add: Insufficient arguments."
 
-
-
-sub :: [Ast] -> Env -> Result
+sub :: [Ast] -> Env -> Function
 sub [a, b] env =
-    case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Value (x - y)
-        (Err errA, _) -> Err ("Error in sub 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in sub 'b': " ++ errB)
-        _ -> Err "Error: Subtract requires two integer values."
-sub _ _ = Err "Error in sub: Insufficient arguments."
+    case (eval a env, eval b env) of
+        (IntRes x, IntRes y) -> IntFunc (x - y)
+        (ErrRes errA, _) -> ErrFunc ("Error in sub 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in sub 'b': " ++ errB)
+        _ -> ErrFunc "Error: Subtract requires two integer values."
+sub _ _ = ErrFunc "Error in sub: Insufficient arguments."
 
-
-mult :: [Ast] -> Env -> Result
+mult :: [Ast] -> Env -> Function
 mult [a, b] env =
-    case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Value (x * y)
-        (Err errA, _) -> Err ("Error in mult 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in mult 'b': " ++ errB)
-        _ -> Err "Error: Multiplication requires two integer values."
-mult _ _ = Err "Error in mult: Insufficient arguments."
+    case (eval a env, eval b env) of
+        (IntRes x, IntRes y) -> IntFunc (x * y)
+        (ErrRes errA, _) -> ErrFunc ("Error in mult 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in mult 'b': " ++ errB)
+        _ -> ErrFunc "Error: Multiplication requires two integer values."
+mult _ _ = ErrFunc "Error in mult: Insufficient arguments."
 
-
-inferior :: [Ast] -> Env -> Result
-inferior [a, b] env =
-    case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Boolean (x < y)
-        (Err errA, _) -> Err ("Error in inferior 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in inferior 'b': " ++ errB)
-        _ -> Err "Error: Inferior requires two integer values."
-inferior _ _ = Err "Error in inferior: Insufficient arguments."
-
-
-division :: [Ast] -> Env -> Result
+division :: [Ast] -> Env -> Function
 division [a, b] env =
-    case (getValue a env, getValue b env) of
-        (_, Value 0) -> Err ("Error: Division by 0 is prohibited")
-        (Value x, Value y) -> Value (x`div`y)
-        (Err errA, _) -> Err ("Error in division 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in division 'b': " ++ errB)
-        _ -> Err "Error: Division requires two integer values."
-division _ _ = Err "Error in division: Insufficient arguments."
+    case (eval a env, eval b env) of
+        (_, IntRes 0) -> ErrFunc ("Error: Division by 0 is prohibited")
+        (IntRes x, IntRes y) -> IntFunc (x`div`y)
+        (ErrRes errA, _) -> ErrFunc ("Error in division 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in division 'b': " ++ errB)
+        _ -> ErrFunc "Error: Division requires two integer values."
+division _ _ = ErrFunc "Error in division: Insufficient arguments."
 
-
-modulo :: [Ast] -> Env -> Result
+modulo :: [Ast] -> Env -> Function
 modulo [a, b] env =
-    case (getValue a env, getValue b env) of
-        (_, Value 0) -> Err ("Error: Modulo by 0 is prohibited")
-        (Value x, Value y) -> Value (x`mod`y)
-        (Err errA, _) -> Err ("Error in modulo 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in modulo 'b': " ++ errB)
-        _ -> Err "Error: Modulo requires two integer values."
-modulo _ _ = Err "Error in modulo: Insufficient arguments."
+    case (eval a env, eval b env) of
+        (_, IntRes 0) -> ErrFunc ("Error: Modulo by 0 is prohibited")
+        (IntRes x, IntRes y) -> IntFunc (x`mod`y)
+        (ErrRes errA, _) -> ErrFunc ("Error in modulo 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in modulo 'b': " ++ errB)
+        _ -> ErrFunc "Error: Modulo requires two integer values."
+modulo _ _ = ErrFunc "Error in modulo: Insufficient arguments."
 
+inferior :: [Ast] -> Env -> Function
+inferior [a, b] env =
+    case (eval a env, eval b env) of
+        (IntRes x, IntRes y) -> BoolFunc (x < y)
+        (ErrRes errA, _) -> ErrFunc ("Error in inferior 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in inferior 'b': " ++ errB)
+        _ -> ErrFunc "Error: Inferior requires two integer values."
+inferior _ _ = ErrFunc "Error in inferior: Insufficient arguments."
 
-equal :: [Ast] -> Env -> Result
+equal :: [Ast] -> Env -> Function
 equal [a, b] env =
-    case (getValue a env, getValue b env) of
-        (Value x, Value y) -> Boolean (x == y)
-        (Err errA, _) -> Err ("Error in equal 'a': " ++ errA)
-        (_, Err errB) -> Err ("Error in equal 'b': " ++ errB)
-        _ -> Err "Error: Equal requires two integer values."
-equal _ _ = Err "Error in equal: Insufficient arguments."
+    case (eval a env, eval b env) of
+        (IntRes x, IntRes y) -> BoolFunc (x == y)
+        (ErrRes errA, _) -> ErrFunc ("Error in equal 'a': " ++ errA)
+        (_, ErrRes errB) -> ErrFunc ("Error in equal 'b': " ++ errB)
+        _ -> ErrFunc "Error: Equal requires two integer values."
+equal _ _ = ErrFunc "Error in equal: Insufficient arguments."
 
-
-ifFunction :: [Ast] -> Env -> Result
+ifFunction :: [Ast] -> Env -> Function
 ifFunction [a, b, c] env =
-    case (getValue a env, getValue b env, getValue c env) of
-        (Boolean True, Value x, _) -> Value x
-        (Boolean True, Boolean x, _) -> Boolean x
-        (Boolean True, Err x, _) -> Err x
-        (Boolean False, _, Value y) -> Value y
-        (Boolean False, _, Boolean y) -> Boolean y
-        (Boolean False, _, Err y) -> Err y
-        _ -> Err "Error in if: First argument must be a boolean condition."
-ifFunction _ _ = Err "Error in if: Insufficient arguments."
+    case (eval a env, eval b env, eval c env) of
+        (BoolRes True, IntRes x, _) -> IntFunc x
+        (BoolRes True, BoolRes x, _) -> BoolFunc x
+        (BoolRes True, ErrRes x, _) -> ErrFunc x
+        (BoolRes False, _, IntRes y) -> IntFunc y
+        (BoolRes False, _, BoolRes y) -> BoolFunc y
+        (BoolRes False, _, ErrRes y) -> ErrFunc y
+        _ -> ErrFunc "Error in if: First argument must be a boolean condition."
+ifFunction _ _ = ErrFunc "Error in if: Insufficient arguments."
 
-addKeyVal :: String -> Ast -> Env -> Env
-addKeyVal key val env = (key, val):env
-
-boolToInt :: Bool -> Int
-boolToInt True = 1
-boolToInt False = 0
-
-setFuncEnv :: [String] -> [Ast] -> Env -> Either Env String
-setFuncEnv (_:_) [] _ = Right "Too few arguments"
-setFuncEnv [] (_:_) _ = Right "Too many arguments"
-setFuncEnv [] [] env = Left env
-setFuncEnv (x:xs) (y:ys) env =
-    case getValue y env of
-        Value s -> setFuncEnv xs ys (addKeyVal x (AstInteger s) env)
-        Boolean s -> setFuncEnv xs ys (addKeyVal x (AstInteger (boolToInt s)) env)
-        Err s -> Right s
-
-getBuiltins :: [(String, [Ast] -> Env -> Result)]
-getBuiltins = [
-    ("+", add),
-    ("-", sub),
-    ("*", mult),
-    ("<", inferior),
-    ("/", division),
-    ("%", modulo),
-    ("=", equal),
-    ("if", ifFunction)
-    ]
-
-isBuild :: [Ast] -> Env -> Result
-isBuild [] _ = (Boolean False)
-isBuild (AstSymbol a:b) env = case lookup a getBuiltins of
-                    Nothing -> Boolean False
-                    Just ab -> ab b env
-isBuild _ _ = Err "Bad call"
-
-funcValue :: [Ast] -> Env -> Result
-funcValue [] _ = (Err "Invalid function call")
-funcValue x env = case isBuild x env of
-    (Boolean False) -> case callFunc x env of
-        (Err err) -> (Err err)
-        (Value a) -> (Value a)
-        (Boolean a) -> (Boolean a)
-    (Boolean a) -> (Boolean a)
-    (Err err) -> (Err err)
-    _ -> (Err "Invalid function call")
-
-
-callFunc :: [Ast] -> Env -> Result
-callFunc (AstLambda a x:[]) env = case (length a) == 0 of
-    False -> (Err ("Incorrect Lambda call"))
-    True -> eval x env
-callFunc (AstLambda a x:b) env = case (length a) == (length b) of
-    False -> (Err ("Incorrect Lambda call"))
-    True -> case setFuncEnv a b env of
-        Left envi -> eval x envi
-        Right err -> (Err err)
-callFunc _ _ = (Err "Invalid function call")
 
 eval :: Ast -> Env -> Result
-eval (AstInteger x) _ = Value x
-eval (AstBoolean x) _ = Boolean x
-eval (AstSymbol x) env = getValue (AstSymbol x) env
-eval (AstCall x) env = funcValue x env
-eval (AstDefine _ _) _ = Err "Define not supported yet"
-eval (AstLambda _ _) _ = Err "Lambda not supported yet"
+eval (AstInteger a) _ = (IntRes a)
+eval (AstBoolean a) _ = (BoolRes a)
+eval (AstSymbol a) env = getSymbol a env
+eval (AstCall _) _ = ErrRes "Call not supported yet"
+eval (AstDefine _ _) _ = ErrRes "Define not supported yet"
+eval (AstLambda _ _) _ = ErrRes "Lambda not supported yet"
 
-printEval :: [Result] -> IO ()
+
+
+printEval :: [Function] -> IO ()
 printEval [] = return ()
 printEval (x:xs) = putStrLn (show x) >> printEval xs
