@@ -1,4 +1,10 @@
 #!/bin/bash
+##
+## EPITECH PROJECT, 2024
+## Glados_mirror
+## File description:
+## functionnal_test
+##
 
 check_executable() {
     local current_directory="$(pwd)"
@@ -50,6 +56,6 @@ run_test() {
 
 #check_executable "$executable_name"
 
-run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]
-[CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
-run_test "test/test.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]" "Test"
+run_test "test/test_simple.scm" "Just (AstCall [AstDefine (Left \"x\") (AstInteger 42),AstCall [AstSymbol \"+\",AstSymbol \"x\",AstInteger 32]])" "Test simple"
+run_test "test/test.scm" "Just (AstDefine (Left \"x\") (AstInteger 42))" "Test"
+run_test "test/test_hard.scm" "Just (AstCall [AstDefine (Left \"add\") (AstCall [AstSymbol \"lambda\",AstCall [AstSymbol \"a\",AstSymbol \"b\"],AstCall [AstSymbol \"+\",AstSymbol \"a\",AstSymbol \"b\"]]),AstCall [AstSymbol \"add\",AstInteger 3,AstInteger 4]])" "Test hard"
