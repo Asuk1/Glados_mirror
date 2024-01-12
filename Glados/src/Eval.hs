@@ -20,7 +20,20 @@ module Eval
         handleFunctionBody,
         handleDefinedSymbolName,
         defineSymbol,
-        -- callFunc,
+        funcCall,
+        callFunc,
+
+        addKeyVal,
+        setFunctionInEnv,
+        callFunction,
+        isBuild,
+        callUserFunction,
+        callBuildFunction,
+        functionValue,
+
+
+
+        eval,
         Function (..),
         Result (..),
     ) where
@@ -57,82 +70,6 @@ instance Show Result where
     show (BoolRes n) = show n
     show (ExprRes n) = n
     show (ErrRes n) = n
-
-
-
-
-
-
--- getValue :: Ast -> Env -> Function
--- getValue (AstInteger a) _ = IntFunc a
--- getValue (AstBoolean a) _ = BoolFunc a
--- getValue (AstSymbol s) env =
---     case lookup s env of
---         Just value -> getValue value env
---         Nothing -> ErrFunc ("Symbol '" ++ s ++ "' not found in the environment.")
--- getValue _ _ = ErrFunc "Error: Unsupported expression type"
-
-
--- addKeyVal :: String -> Ast -> Env -> Env
--- addKeyVal key val env = (key, val):env
-
--- boolToInt :: Bool -> Int
--- boolToInt True = 1
--- boolToInt False = 0
-
--- setFuncEnv :: [String] -> [Ast] -> Env -> Either Env String
--- setFuncEnv (_:_) [] _ = Right "Too few arguments"
--- setFuncEnv [] (_:_) _ = Right "Too many arguments"
--- setFuncEnv [] [] env = Left env
--- setFuncEnv (x:xs) (y:ys) env =
---     case getValue y env of
---         IntFunc s -> setFuncEnv xs ys (addKeyVal x (AstInteger s) env)
---         BoolFunc s -> setFuncEnv xs ys (addKeyVal x (AstInteger (boolToInt s)) env)
---         ErrFunc s -> Right s
-
--- getBuiltins :: [(String, [Ast] -> Env -> Function)]
--- getBuiltins = [
---     ("+", add),
---     ("-", sub),
---     ("*", mult),
---     ("<", inferior),
---     ("/", division),
---     ("%", modulo),
---     ("=", equal),
---     ("if", ifFunction)
---     ]
-
--- isBuild :: [Ast] -> Env -> Function
--- isBuild [] _ = (BoolFunc False)
--- isBuild (AstSymbol a:b) env = case lookup a getBuiltins of
---                     Nothing -> BoolFunc False
---                     Just ab -> ab b env
--- isBuild _ _ = ErrFunc "Bad call"
-
--- funcValue :: [Ast] -> Env -> Function
--- funcValue [] _ = (ErrFunc "Invalid function call")
--- funcValue x env = case isBuild x env of
---     (BoolFunc False) -> case callFunc x env of
---         (ErrFunc err) -> (ErrFunc err)
---         (IntFunc a) -> (IntFunc a)
---         (BoolFunc a) -> (BoolFunc a)
---     (BoolFunc a) -> (BoolFunc a)
---     (ErrFunc err) -> (ErrFunc err)
---     _ -> (ErrFunc "Invalid function call")
-
-
--- callFunc :: [Ast] -> Env -> Function
--- callFunc (AstLambda a x:[]) env = case (length a) == 0 of
---     False -> (ErrFunc ("Incorrect Lambda call"))
---     True -> eval x env
--- callFunc (AstLambda a x:b) env = case (length a) == (length b) of
---     False -> (ErrFunc ("Incorrect Lambda call"))
---     True -> case setFuncEnv a b env of
---         Left envi -> eval x envi
---         Right err -> (ErrFunc err)
--- callFunc _ _ = (ErrFunc "Invalid function call")
-
-
 
 
 
@@ -252,6 +189,100 @@ defineSymbol (Right (a:params)) body env = handleDefinedSymbolName a params body
 
 
 
+addKeyVal :: String -> Ast -> Env -> Env
+addKeyVal key val env = (key, val) : env
+
+setFunctionInEnv :: [String] -> [Ast] -> Env -> Either Env String
+setFunctionInEnv (_:_) [] _ = Right "Too few arguments"
+setFunctionInEnv [] (_:_) _ = Right "Too many arguments"
+setFunctionInEnv [] [] env = Left env
+setFunctionInEnv (x:xs) (y:ys) env =
+    case eval y env of
+        IntRes s -> setFunctionInEnv xs ys (addKeyVal x (AstInteger s) env)
+        BoolRes s -> setFunctionInEnv xs ys (addKeyVal x (AstBoolean s) env)
+        ErrRes s -> Right s
+        _ -> Right ("Func " ++ x ++ ": no expression in body.")
+
+
+callFunction :: String -> [String] -> Ast -> [Ast] -> Env -> Function
+callFunction name params body actualArgs env =
+    case length params == length actualArgs of
+        False -> ErrFunc ("Calling " ++ name ++ " with an incorrect number of arguments.")
+        True ->
+            case setFunctionInEnv params actualArgs env of
+                Left newEnv ->
+                    case eval body newEnv of
+                        IntRes v -> IntFunc v
+                        BoolRes v -> BoolFunc v
+                        ErrRes err -> ErrFunc err
+                        _ -> ErrFunc (name ++ ": incorrect return type.")
+                Right err -> ErrFunc err
+
+funcCall :: String -> Ast -> [Ast] -> Env -> Function
+funcCall name (AstDefine (Right params) body) actualArgs env =
+    callFunction name params body actualArgs env
+funcCall name (AstLambda lambdaParams body) actualArgs env =
+    callFunction name lambdaParams body actualArgs env
+funcCall name _ _ _ = ErrFunc ("Invalid call " ++ name ++ ".")
+
+
+
+callFunc :: [Ast] -> Env -> Function
+callFunc [AstLambda params body] env =
+    case length params == 0 of
+        True -> case eval body env of
+            IntRes v -> IntFunc v
+            BoolRes v -> BoolFunc v
+            ErrRes err -> ErrFunc err
+            _ -> ErrFunc "lambda: incorrect return type."
+        False -> ErrFunc "Calling lambda with an incorrect number of arguments."
+callFunc (AstSymbol name : args) env =
+    case lookup name env of
+        Nothing -> ErrFunc (name ++ " is not in the environment.")
+        Just val -> funcCall name val args env
+callFunc _ _ = ErrFunc "Invalid syntax."
+
+
+
+isBuild :: [Ast] -> Env -> Either String Function
+isBuild (AstSymbol a:b) env =
+    case lookup a [
+        ("if", ifFunction),
+        ("+", add),
+        ("-", sub),
+        ("*", mult),
+        ("div", division),
+        ("mod", modulo),
+        ("<", inferior),
+        ("eq?", equal)
+        ] of
+            Nothing -> Left ("Function not found")
+            Just ab -> Right (ab b env)
+isBuild _ _ = Left "Invalid function call."
+
+callUserFunction :: [Ast] -> Env -> Result
+callUserFunction args env =
+    case callFunc args env of
+        IntFunc result -> IntRes result
+        BoolFunc result -> BoolRes result
+        ErrFunc err -> ErrRes err
+
+callBuildFunction :: [Ast] -> Env -> Result
+callBuildFunction args env =
+    case isBuild args env of
+        Right (IntFunc result) -> IntRes result
+        Right (BoolFunc result) -> BoolRes result
+        Right (ErrFunc err) -> ErrRes err
+        Left "Function not found" -> callUserFunction args env
+        Left err -> ErrRes err
+
+functionValue :: [Ast] -> Env -> Result
+functionValue [] _ = ErrRes "Invalid function call"
+functionValue args env =
+    case callBuildFunction args env of
+        IntRes result -> IntRes result
+        BoolRes result -> BoolRes result
+        ErrRes err -> ErrRes err
 
 
 
@@ -260,9 +291,9 @@ eval :: Ast -> Env -> Result
 eval (AstInteger x) _ = (IntRes x)
 eval (AstBoolean x) _ = (BoolRes x)
 eval (AstSymbol x) env = getSymbol x env
-eval (AstCall _) _ = ErrRes "Call not supported yet"
+eval (AstCall x) env = functionValue x env
 eval (AstDefine x xs) env = defineSymbol x xs env
-eval (AstLambda _ _) _ = ErrRes "Lambda not supported yet"
+eval (AstLambda _ _) _ = (ExprRes "lambda")
 
 
 
