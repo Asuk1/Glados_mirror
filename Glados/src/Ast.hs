@@ -13,6 +13,7 @@ module Ast (
     printTree,
     cptToAST,
     cptListToAstList,
+    writeAstListToFile,
 ) where
 
 import Data.Maybe
@@ -82,3 +83,6 @@ cptListToAstList (x:xs) =
         Just astList -> Just (ast : astList)
         Nothing -> Nothing
     Nothing -> error "Syntax Error"
+
+writeAstListToFile :: FilePath -> [Ast] -> IO ()
+writeAstListToFile filePath astList = writeFile filePath (show astList)

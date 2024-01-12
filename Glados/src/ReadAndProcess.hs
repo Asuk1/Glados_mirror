@@ -49,7 +49,11 @@ processLine line = do
             let tokens = ("(" : stringToToken line)
             let (open, close) = checkParenthesis tokens
             if open == close
-                then putStrLn $ show $ cptListToAstList $ tokenToCpt tokens
+                then case cptListToAstList (tokenToCpt tokens) of
+                        Just astList -> do
+                            putStrLn $ show astList
+                            writeAstListToFile "ast_result.txt" astList
+                        Nothing -> putStrLn "Syntax Error"
                 else error "Syntax Error"
 
 processContent :: String -> IO ()
@@ -60,5 +64,9 @@ processContent content = do
             let tokens = ("(" : stringToToken content)
             let (open, close) = checkParenthesis tokens
             if open == close
-                then putStrLn $ show $ cptListToAstList $ tokenToCpt tokens
+                then case cptListToAstList (tokenToCpt tokens) of
+                        Just astList -> do
+                            putStrLn $ show astList
+                            writeAstListToFile "ast_result.txt" astList
+                        Nothing -> putStrLn "Syntax Error"
                 else error "Syntax Error"
