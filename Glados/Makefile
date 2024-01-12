@@ -23,6 +23,7 @@ fclean: clean
 	$(RM) $(NAME)
 	$(RM) -r .stack-work
 	$(RM) -rf test/coverage
+	$(RM) -rf ast_result.txt
 
 re: fclean all
 

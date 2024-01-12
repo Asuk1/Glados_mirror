@@ -1,2 +1,2 @@
-(define x 42)
-(+ x 32)
+define x 42;
++ x 32;
