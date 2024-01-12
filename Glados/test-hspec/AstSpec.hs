@@ -53,16 +53,16 @@ testCptToAST = do
             cptToAST (CptList [CptSymbols "add", CptInt 1, CptList [CptSymbols "multiply", CptInt 2, CptInt 3]])
                 `shouldBe` Just (AstCall [AstSymbol "add", AstInteger 1, AstCall [AstSymbol "multiply", AstInteger 2, AstInteger 3]])
 
-testCptListToAst :: Spec
-testCptListToAst = do
-    describe "cptListToAst" $ do
+testCptListToAstList :: Spec
+testCptListToAstList = do
+    describe "cptListToAstList" $ do
         it "handles empty list (Nothing)" $
-            cptListToAst [] `shouldBe` Nothing
+            cptListToAstList [] `shouldBe` Just []
         it "converts a single Cpt expression to Ast" $
-            cptListToAst [CptInt 42] `shouldBe` Just (AstInteger 42)
+            cptListToAstList [CptInt 42] `shouldBe` Just ([AstInteger 42])
         it "handles nested calls in the list" $
-            cptListToAst [CptList [CptSymbols "add", CptInt 1, CptList [CptSymbols "multiply", CptInt 2, CptInt 3]]] `shouldBe`
-                Just (AstCall [AstSymbol "add", AstInteger 1, AstCall [AstSymbol "multiply", AstInteger 2, AstInteger 3]])
+            cptListToAstList [CptList [CptSymbols "add", CptInt 1, CptList [CptSymbols "multiply", CptInt 2, CptInt 3]]] `shouldBe`
+                Just ([AstCall [AstSymbol "add", AstInteger 1, AstCall [AstSymbol "multiply", AstInteger 2, AstInteger 3]]])
 
 spec :: Spec
 spec = do
@@ -70,4 +70,4 @@ spec = do
     testGetInteger
     testGetList
     testCptToAST
-    testCptListToAst
+    testCptListToAstList

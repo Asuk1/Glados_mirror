@@ -12,7 +12,7 @@ module Ast (
     getList,
     printTree,
     cptToAST,
-    cptListToAst,
+    cptListToAstList,
 ) where
 
 import Data.Maybe
@@ -73,12 +73,12 @@ cptToAST (CptList (CptInt n : xs)) = Just (AstCall (AstInteger n : mapMaybe cptT
 cptToAST (CptList (CptSymbols s : xs)) = Just (AstCall (AstSymbol s : mapMaybe cptToAST xs))
 cptToAST _ = Nothing
 
-cptListToAst :: [Cpt] -> Maybe Ast
-cptListToAst [] = Nothing
-cptListToAst [expr] = cptToAST expr
-cptListToAst (x:xs) =
+cptListToAstList :: [Cpt] -> Maybe [Ast]
+cptListToAstList [] = Just []
+cptListToAstList (x:xs) =
   case cptToAST x of
-    Just ast -> case cptListToAst xs of
-                  Just astList -> Just (AstCall (ast : [astList]))
-                  Nothing -> Nothing
+    Just ast ->
+      case cptListToAstList xs of
+        Just astList -> Just (ast : astList)
+        Nothing -> Nothing
     Nothing -> Nothing
