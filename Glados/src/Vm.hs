@@ -28,7 +28,7 @@ import Data.Binary.Put (Put, runPut, putWord8, putWord32le)
 import qualified Data.ByteString.Lazy as BL
 
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
-data Op = Add | Sub | Mul | Div | Less| Fact | Equal deriving (Show, Eq)
+data Op = Add | Sub | Mul | Div | Less| Fact | Succ | Equal deriving (Show, Eq)
 data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String | Define deriving (Show, Eq)
 type Stack = [Value]
 type Env = [(String, Value)]
@@ -47,6 +47,7 @@ opToFunction Div = div
 opToFunction Less = \a b -> if a < b then 1 else 0
 opToFunction Equal = \a b -> if a == b then 1 else 0
 opToFunction Fact = \a _ -> if a <= 1 then 1 else a * opToFunction Fact (a - 1) 1
+opToFunction Succ = \a _ -> a + 1
 
 executeInstruction :: Instruction -> Stack -> [Value] -> Env -> Either String (Stack, Int)
 executeInstruction Define stack _ _ = Right (stack, 1)
@@ -108,6 +109,7 @@ parseOp op = case op of
     "Less" -> Less
     "Fact" -> Fact
     "Equal" -> Equal
+    "Succ" -> Succ
     _ -> error "Unknown operation"
 
 astToInstructions :: Ast -> [Instruction]
@@ -125,6 +127,7 @@ astToInstructions (AstDefine (Right argList) body) =
     astToInstructions (AstCall [AstDefine (Right argList) body])
 astToInstructions (AstLambda argList body) =
     [Push (VFunc (astToInstructions (AstCall [AstDefine (Right argList) body])))]
+astToInstructions _ = []
 
 instructionToOpcode :: Instruction -> Put
 instructionToOpcode (Push value) = do
@@ -159,17 +162,19 @@ instructionsToBytecode instrs = forM_ instrs instructionToOpcode
 writeBytecodeToFile :: FilePath -> Put -> IO ()
 writeBytecodeToFile filePath bytecodePut = encodeFile filePath (runPut bytecodePut)
 
-main :: String -> IO ()
-main filePath = do
+compiler :: String -> IO ()
+compiler filePath = do
     contents <- readFile filePath
     putStrLn "\nContenu du fichier:"
     putStrLn contents
 
-    let newAst = read contents :: Ast
-    putStrLn "Ast:"
-    putStrLn $ show newAst
+    let astList = read contents :: [Ast]
+    putStrLn "Liste d'Ast convertie:"
+    mapM_ (putStrLn . show) astList
 
-    let instructions = astToInstructions newAst
+    putStrLn "Liste d'Ast:"
+    mapM_ (putStrLn . show) astList
+    let instructions = concatMap astToInstructions astList
     putStrLn "Instructions generated from the AST:"
     mapM_ print instructions
 
@@ -181,23 +186,25 @@ main filePath = do
     writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
     putStrLn $ "Bytecode written to file: " ++ outputFilePath
 
--- main' :: String -> IO ()
--- main' filePath = do
---     contents <- readFile filePath
---     putStrLn "Contenu du fichier :"
---     putStrLn contents
---     let linesOfFile = lines contents
---     let instructions = mapMaybe parseInstruction linesOfFile
---     putStrLn "Instructions lues du fichier :"
+-- main :: String -> IO ()
+-- main filePath = do
+--     putStrLn $ "Reading bytecode file: " ++ filePath
+--     instructions <- readBytecodeFile filePath
+--     putStrLn "Instructions read from the bytecode file:"
 --     mapM_ print instructions
---     let initialStack = []
---     putStrLn "instruction"
---     putStrLn $ show instructions
---     let env = [("abs", VFunc instructions)]
---     putStrLn "env :"
---     putStrLn $ show env
---     case exec instructions initialStack [VInt (-42)] env 0 of
---         Right resultStack -> case resultStack of
---             (VInt result : _) -> print result
---             _ -> putStrLn $ show resultStack
---         Left errorMsg -> putStrLn errorMsg
+
+-- let linesOfFile = lines contents
+-- let instructions = mapMaybe parseInstruction linesOfFile
+-- putStrLn "Instructions lues du fichier :"
+-- mapM_ print instructions
+-- let initialStack = []
+-- putStrLn "instruction"
+-- putStrLn $ show instructions
+-- let env = [("abs", VFunc instructions)]
+-- putStrLn "env :"
+-- putStrLn $ show env
+-- case exec instructions initialStack [VInt (-42)] env 0 of
+--     Right resultStack -> case resultStack of
+--         (VInt result : _) -> print result
+--         _ -> putStrLn $ show resultStack
+--     Left errorMsg -> putStrLn errorMsg
