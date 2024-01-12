@@ -130,17 +130,17 @@ instance Show Result where
 
 
 
+
+
 getSymbol :: String -> Env -> Result
 getSymbol str env =
     case lookup str env of
-        Nothing -> ErrRes (str ++ " is not in the environment")
+        Nothing -> ErrRes (str ++ " is not in the environment.")
         Just (AstInteger value) -> IntRes value
         Just (AstBoolean value) -> BoolRes value
         Just (AstSymbol symbol) -> eval (AstSymbol symbol) env
-        Just (AstDefine _ _) -> ExprRes ("function define " ++ str)
-        Just (AstLambda _ _) -> ExprRes ("function define " ++ str)
-        _ -> ErrRes (str ++ " si not defined")
-getValue _ _ = ErrFunc "Error: Unsupported expression type"
+        Just (AstDefine _ _) -> ExprRes ("function define " ++ str ++ ".")
+        Just (AstLambda _ _) -> ExprRes ("function lambda " ++ str ++ ".")
 
 
 add :: [Ast] -> Env -> Function
@@ -219,6 +219,17 @@ ifFunction [a, b, c] env =
         (BoolRes False, _, ErrRes y) -> ErrFunc y
         _ -> ErrFunc "Error in if: First argument must be a boolean condition."
 ifFunction _ _ = ErrFunc "Error in if: Insufficient arguments."
+
+
+
+
+
+
+
+
+
+
+
 
 
 eval :: Ast -> Env -> Result

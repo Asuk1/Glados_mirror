@@ -32,9 +32,9 @@ testAddFunction = do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             add [AstBoolean True, AstInteger 4] [] `shouldBe` (ErrFunc "Error: Addition requires two integer values.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
-            add [AstSymbol "x", AstInteger 4] [] `shouldBe` (ErrFunc "Error in add 'a': x is not in the environment")
+            add [AstSymbol "x", AstInteger 4] [] `shouldBe` (ErrFunc "Error in add 'a': x is not in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
-            add [AstInteger 3, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in add 'b': y is not in the environment")
+            add [AstInteger 3, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in add 'b': y is not in the environment.")
         it "should return an error if 'b' is an integer and 'a' is not" $ do
             let env = [("x", AstInteger 3)]
             add [AstSymbol "x", AstBoolean False] env `shouldBe` (ErrFunc "Error: Addition requires two integer values.")
@@ -72,9 +72,9 @@ testSubFunction = do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             sub [AstBoolean True, AstInteger 4] [] `shouldBe` (ErrFunc "Error: Subtract requires two integer values.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
-            sub [AstSymbol "x", AstInteger 4] [] `shouldBe` (ErrFunc "Error in sub 'a': x is not in the environment")
+            sub [AstSymbol "x", AstInteger 4] [] `shouldBe` (ErrFunc "Error in sub 'a': x is not in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
-            sub [AstInteger 3, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in sub 'b': y is not in the environment")
+            sub [AstInteger 3, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in sub 'b': y is not in the environment.")
         it "should return an error if 'b' is an integer and 'a' is not" $ do
             let env = [("x", AstInteger 3)]
             sub [AstSymbol "x", AstBoolean False] env `shouldBe` (ErrFunc "Error: Subtract requires two integer values.")
@@ -112,9 +112,9 @@ testMultFunction = do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             mult [AstBoolean True, AstInteger 4] [] `shouldBe` (ErrFunc "Error: Multiplication requires two integer values.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
-            mult [AstSymbol "x", AstInteger 4] [] `shouldBe` (ErrFunc "Error in mult 'a': x is not in the environment")
+            mult [AstSymbol "x", AstInteger 4] [] `shouldBe` (ErrFunc "Error in mult 'a': x is not in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
-            mult [AstInteger 3, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in mult 'b': y is not in the environment")
+            mult [AstInteger 3, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in mult 'b': y is not in the environment.")
         it "should return an error if 'b' is an integer and 'a' is not" $ do
             let env = [("x", AstInteger 3)]
             mult [AstSymbol "x", AstBoolean False] env `shouldBe` (ErrFunc "Error: Multiplication requires two integer values.")
@@ -154,9 +154,9 @@ testDivFunction = do
         it "should return an error if 'b' is not a valid integer or symbol" $ do
             division [AstInteger 3, AstBoolean False] [] `shouldBe` (ErrFunc "Error: Division requires two integer values.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
-            division [AstSymbol "x", AstInteger 8] [] `shouldBe` (ErrFunc "Error in division 'a': x is not in the environment")
+            division [AstSymbol "x", AstInteger 8] [] `shouldBe` (ErrFunc "Error in division 'a': x is not in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not" $ do
-            division [AstInteger 8, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in division 'b': y is not in the environment")
+            division [AstInteger 8, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in division 'b': y is not in the environment.")
         it "should return an error if 'b' is an integer and 'a' is not" $ do
             let env = [("x", AstInteger 8)]
             division [AstSymbol "x", AstInteger 0] env `shouldBe` (ErrFunc "Error: Division by 0 is prohibited")
@@ -196,9 +196,9 @@ testModFunction = do
         it "should return an error if 'b' is not a valid integer or symbol" $ do
             modulo [AstInteger 3, AstBoolean False] [] `shouldBe` (ErrFunc "Error: Modulo requires two integer values.")
         it "should return an error if 'a' is an integer and 'b' is not in the environment" $ do
-            modulo [AstSymbol "x", AstInteger 8] [] `shouldBe` (ErrFunc "Error in modulo 'a': x is not in the environment")
+            modulo [AstSymbol "x", AstInteger 8] [] `shouldBe` (ErrFunc "Error in modulo 'a': x is not in the environment.")
         it "should return an error if 'a' is an integer and 'b' is not in the environment" $ do
-            modulo [AstInteger 8, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in modulo 'b': y is not in the environment")
+            modulo [AstInteger 8, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in modulo 'b': y is not in the environment.")
         it "should return an error if 'b' is an integer and 'a' is not in the environment" $ do
             let env = [("x", AstInteger 8)]
             modulo [AstSymbol "y", AstInteger 0] env `shouldBe` (ErrFunc "Error: Modulo by 0 is prohibited")
@@ -231,9 +231,9 @@ testInferiorFunction = do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             inferior [AstBoolean True, AstInteger 4] [] `shouldBe` (ErrFunc "Error: Inferior requires two integer values.")
         it "should return an error if 'a' is not a valid integer or symbol" $ do
-            inferior [AstSymbol "x", AstBoolean False] [] `shouldBe` (ErrFunc "Error in inferior 'a': x is not in the environment")
+            inferior [AstSymbol "x", AstBoolean False] [] `shouldBe` (ErrFunc "Error in inferior 'a': x is not in the environment.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
-            inferior [AstBoolean False, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in inferior 'b': y is not in the environment")
+            inferior [AstBoolean False, AstSymbol "y"] [] `shouldBe` (ErrFunc "Error in inferior 'b': y is not in the environment.")
     describe "Insufficient arguments." $ do
         it "should return an error if there are insufficient arguments." $ do
             inferior [AstInteger 3] [] `shouldBe` (ErrFunc "Error in inferior: Insufficient arguments.")
@@ -257,9 +257,9 @@ testEqualFunction = do
         it "should return an error if 'a' is not a valid integer or symbol" $ do
             equal [AstBoolean True, AstInteger 4] [] `shouldBe` (ErrFunc "Error: Equal requires two integer values.")
         it "should return an error if 'a' is not a valid integer or symbol" $ do
-            equal [AstSymbol "y", AstBoolean False] [] `shouldBe` (ErrFunc "Error in equal 'a': y is not in the environment")
+            equal [AstSymbol "y", AstBoolean False] [] `shouldBe` (ErrFunc "Error in equal 'a': y is not in the environment.")
         it "should return an error if 'b' is not a valid integer or symbol" $ do
-            equal [AstBoolean False, AstSymbol "x"] [] `shouldBe` (ErrFunc "Error in equal 'b': x is not in the environment")
+            equal [AstBoolean False, AstSymbol "x"] [] `shouldBe` (ErrFunc "Error in equal 'b': x is not in the environment.")
     describe "Insufficient arguments." $ do
         it "should return an error if there are insufficient arguments." $ do
             equal [AstInteger 3] [] `shouldBe` (ErrFunc "Error in equal: Insufficient arguments.")
@@ -282,9 +282,9 @@ testIfFunction = do
         it "should return Bool y when the condition is #f and the false branch is Bool y" $ do
             ifFunction [AstBoolean False, AstBoolean True, AstBoolean False] [] `shouldBe` (BoolFunc False)
         it "should return Err y when the condition is #f and the false branch is Err y" $ do
-            ifFunction [AstBoolean False, AstBoolean True, AstSymbol "undefined"] [] `shouldBe` (ErrFunc "undefined is not in the environment")
+            ifFunction [AstBoolean False, AstBoolean True, AstSymbol "undefined"] [] `shouldBe` (ErrFunc "undefined is not in the environment.")
         it "should return Err y when the condition is #f and the false branch is Err y" $ do
-            ifFunction [AstBoolean True, AstSymbol "undefined", AstBoolean True] [] `shouldBe` (ErrFunc "undefined is not in the environment")
+            ifFunction [AstBoolean True, AstSymbol "undefined", AstBoolean True] [] `shouldBe` (ErrFunc "undefined is not in the environment.")
         it "should return an error when the condition is not a valid boolean" $ do
             ifFunction [AstInteger 1, AstInteger 42, AstInteger 24] [] `shouldBe` (ErrFunc "Error in if: First argument must be a boolean condition.")
         it "should return an error when there are insufficient arguments" $ do
@@ -304,12 +304,13 @@ testGetSymbol = do
             getSymbol "x" env `shouldBe` IntRes 99
         it "should return ExprRes for functions (AstDefine, AstLambda)" $ do
             let env = [("func", AstDefine (Left "f") (AstLambda ["x"] (AstSymbol "x")))]
-            getSymbol "func" env `shouldBe` ExprRes "function func"
+            getSymbol "func" env `shouldBe` ExprRes "function define func."
         it "should return ErrRes if the symbol is not in the environment" $ do
-            getSymbol "unknown" [] `shouldBe` ErrRes "unknown is not in the environment"
+            getSymbol "unknown" [] `shouldBe` ErrRes "unknown is not in the environment."
         it "should return ErrRes if the symbol is bound to an unsupported expression type" $ do
             let env = [("unsupported", AstLambda ["x"] (AstSymbol "x"))]
-            getSymbol "unsupported" env `shouldBe` ErrRes "unsupported is not defined"
+            getSymbol "unsupported" env `shouldBe` ExprRes "function lambda unsupported."
+
 
 
 spec :: Spec
