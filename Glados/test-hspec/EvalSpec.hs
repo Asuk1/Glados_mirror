@@ -311,6 +311,64 @@ testGetSymbol = do
             let env = [("unsupported", AstLambda ["x"] (AstSymbol "x"))]
             getSymbol "unsupported" env `shouldBe` ExprRes "function lambda unsupported."
 
+testAddOrReplaceKey :: Spec
+testAddOrReplaceKey = do
+    describe "addOrReplaceKey" $ do
+        it "should add a new key-value pair to an empty environment" $ do
+            addOrReplaceKey "x" (AstInteger 42) [] `shouldBe` [("x", AstInteger 42)]
+        it "should replace the value of an existing key" $ do
+            let env = [("x", AstInteger 42)]
+            addOrReplaceKey "x" (AstInteger 24) env `shouldBe` [("x", AstInteger 24)]
+        it "should add a new key-value pair to an existing environment" $ do
+            let env = [("y", AstBoolean True)]
+            addOrReplaceKey "x" (AstInteger 42) env `shouldBe` [("x", AstInteger 42), ("y", AstBoolean True)]
+
+testHandleFunctionBody :: Spec
+testHandleFunctionBody = do
+    describe "handleFunctionBody" $ do
+        it "should handle IntRes result" $ do
+            let env = [("a", AstInteger 5)]
+            handleFunctionBody "b" (AstInteger 10) env `shouldBe` EnvRes [("b", AstInteger 10), ("a", AstInteger 5)]
+        it "should handle BoolRes result" $ do
+            let env = [("a", AstBoolean True)]
+            handleFunctionBody "b" (AstBoolean False) env `shouldBe` EnvRes [("b", AstBoolean False), ("a", AstBoolean True)]
+        it "should handle ExprRes result" $ do
+            let env = [("a", AstInteger 5)]
+            handleFunctionBody "b" (AstSymbol "a") env `shouldBe` EnvRes [("b", AstInteger 5), ("a", AstInteger 5)]
+        it "should handle invalid assignment to function" $ do
+            let env = [("a", AstDefine (Right ["x"]) (AstSymbol "x"))]
+            handleFunctionBody "a" (AstInteger 10) env `shouldBe` EnvRes [("a",AstInteger 10)]
+
+testHandleDefinedSymbolName :: Spec
+testHandleDefinedSymbolName = do
+    describe "handleDefinedSymbolName" $ do
+        it "should handle defined symbol name with parameters" $ do
+            let env = [("a", AstInteger 5)]
+            handleDefinedSymbolName "b" ["x"] (AstSymbol "x") env `shouldBe` EnvRes [("b", AstDefine (Right ["x"]) (AstSymbol "x")), ("a", AstInteger 5)]
+        it "should handle defined symbol name without parameters" $ do
+            let env = [("a", AstInteger 5)]
+            handleDefinedSymbolName "b" [] (AstInteger 10) env `shouldBe` EnvRes [("b", AstDefine (Right []) (AstInteger 10)), ("a", AstInteger 5)]
+
+testDefineSymbol :: Spec
+testDefineSymbol = do
+    describe "defineSymbol" $ do
+        it "should handle Left case with valid body" $ do
+            let env = [("a", AstInteger 5)]
+            defineSymbol (Left "b") (AstInteger 10) env `shouldBe` EnvRes [("b", AstInteger 10), ("a", AstInteger 5)]
+        it "should handle Left case with invalid assignment" $ do
+            let env = [("a", AstDefine (Right ["x"]) (AstSymbol "x"))]  -- Fix the argument here
+            defineSymbol (Left "a") (AstInteger 10) env `shouldBe` EnvRes [("a",AstInteger 10)]
+        it "should handle Right case with empty parameters" $ do
+            let env = [("a", AstInteger 5)]
+            defineSymbol (Right []) (AstInteger 10) env `shouldBe` ErrRes "Symbol name is not defined."
+        it "should handle Right case with valid parameters" $ do
+            let env = [("a", AstInteger 5)]
+            defineSymbol (Right ["b"]) (AstSymbol "x") env `shouldBe` EnvRes [("b", AstDefine (Right []) (AstSymbol "x")), ("a", AstInteger 5)]
+        it "should handle Left case with function assignment" $ do
+            let env = [("a", AstDefine (Right ["x"]) (AstSymbol "x"))]
+            defineSymbol (Left "a") (AstDefine (Right ["y"]) (AstSymbol "y")) env `shouldBe` ErrRes "Cannot assign to symbol 'a'. Functions cannot be assigned directly."
+
+
 
 
 spec :: Spec
@@ -324,4 +382,8 @@ spec = do
     testEqualFunction
     testIfFunction
     testGetSymbol
+    testAddOrReplaceKey
+    testHandleFunctionBody
+    testHandleDefinedSymbolName
+    testDefineSymbol
 
