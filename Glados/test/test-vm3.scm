@@ -1,1 +1,0 @@
-AstCall [AstDefine (Left "Mul") (AstCall [AstSymbol "lambda",AstCall [AstSymbol "x", AstSymbol "y"],AstCall [AstSymbol "*", AstSymbol "x", AstSymbol "y"]]),AstCall [AstSymbol "Mul",AstInteger 5,AstInteger 2]]

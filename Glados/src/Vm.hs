@@ -186,6 +186,12 @@ compiler filePath = do
     writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
     putStrLn $ "Bytecode written to file: " ++ outputFilePath
 
+executer:: String -> IO ()
+executer filepath = do
+    contents <- readFile filepath
+    putStrLn "\nContenu du fichier:"
+    putStrLn contents
+
 -- main :: String -> IO ()
 -- main filePath = do
 --     putStrLn $ "Reading bytecode file: " ++ filePath
