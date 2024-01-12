@@ -120,22 +120,26 @@ astToInstructions (AstDefine (Right argList) body) =
 astToInstructions (AstLambda argList body) =
     [Push (VFunc (astToInstructions (AstCall [AstDefine (Right argList) body])))]
 
--- main' :: String -> IO ()
--- main' filePath = do
---     contents <- readFile filePath
---     putStrLn "Contenu du fichier :"
---     putStrLn contents
---     let linesOfFile = lines contents
---     let instructions = mapMaybe parseInstruction linesOfFile
---     putStrLn "Instructions lues du fichier :"
---     mapM_ print instructions
---     let initialStack = [VInt (-42)]
---     let env = [("abs", VInt 42)]
---     case exec instructions initialStack [] env 0 of
---         Right resultStack -> case resultStack of
---             (VInt result : _) -> print result
---             _ -> putStrLn "Error: Invalid result on stack"
---         Left errorMsg -> putStrLn errorMsg
+main' :: String -> IO ()
+main' filePath = do
+    contents <- readFile filePath
+    putStrLn "Contenu du fichier :"
+    putStrLn contents
+    let linesOfFile = lines contents
+    let instructions = mapMaybe parseInstruction linesOfFile
+    putStrLn "Instructions lues du fichier :"
+    mapM_ print instructions
+    let initialStack = []
+    putStrLn "instruction"
+    putStrLn $ show instructions
+    let env = [("abs", VFunc instructions)]
+    putStrLn "env :"
+    putStrLn $ show env
+    case exec instructions initialStack [VInt (-42)] env 0 of
+        Right resultStack -> case resultStack of
+            (VInt result : _) -> print result
+            _ -> putStrLn $ show resultStack
+        Left errorMsg -> putStrLn errorMsg
 
 instructionToOpcode :: Instruction -> Put
 instructionToOpcode (Push value) = do
@@ -170,17 +174,17 @@ instructionsToBytecode instrs = forM_ instrs instructionToOpcode
 writeBytecodeToFile :: FilePath -> Put -> IO ()
 writeBytecodeToFile filePath bytecodePut = encodeFile filePath (runPut bytecodePut)
 
-main :: IO ()
-main = do
-    let exampleAst = AstCall [AstDefine (Left "add") (AstCall [AstSymbol "lambda",AstCall [AstSymbol "a",AstSymbol "b"],AstCall [AstSymbol "+",AstSymbol "a",AstSymbol "b"]]),AstCall [AstSymbol "add",AstInteger 3,AstInteger 4]]
+-- main :: IO ()
+-- main = do
+--     let exampleAst = AstCall [AstDefine (Left "add") (AstCall [AstSymbol "lambda",AstCall [AstSymbol "a",AstSymbol "b"],AstCall [AstSymbol "+",AstSymbol "a",AstSymbol "b"]]),AstCall [AstSymbol "add",AstInteger 3,AstInteger 4]]
 
-    let instructions = astToInstructions exampleAst
-    putStrLn "Instructions generated from the AST:"
-    mapM_ print instructions
-    putStrLn "\nBytecode generated:"
-    let bytecode = runPut $ instructionsToBytecode instructions
-    BL.putStr bytecode
-    putStrLn ""
-    let outputFilePath = "vm_bytecode.bin"
-    writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
-    putStrLn $ "Bytecode written to file: " ++ outputFilePath
+--     let instructions = astToInstructions exampleAst
+--     putStrLn "Instructions generated from the AST:"
+--     mapM_ print instructions
+--     putStrLn "\nBytecode generated:"
+--     let bytecode = runPut $ instructionsToBytecode instructions
+--     BL.putStr bytecode
+--     putStrLn ""
+--     let outputFilePath = "vm_bytecode.bin"
+--     writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
+--     putStrLn $ "Bytecode written to file: " ++ outputFilePath
