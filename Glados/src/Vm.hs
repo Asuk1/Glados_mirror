@@ -13,9 +13,15 @@ module Vm (
     performOperation,
     executeInstruction,
     exec,
+    parseInstruction,
+    parseOp,
+    astToInstructions,
+    instructionToOpcode,
+    valueToOpcode,
+    instructionsToBytecode,
+    writeBytecodeToFile,
     ) where
 
-import Data.Maybe
 import Data.Binary (encodeFile)
 import Control.Monad (forM_)
 import Data.Binary.Put (Put, runPut, putWord8, putWord32le)
@@ -31,7 +37,7 @@ data Ast = AstInteger Int
     | AstBoolean String
     | AstCall [Ast]
     | AstDefine (Either String [String]) Ast
-    | AstLambda [String] Ast deriving (Show, Eq)
+    | AstLambda [String] Ast deriving (Read, Show, Eq)
 
 opToFunction :: Op -> (Int -> Int -> Int)
 opToFunction Add = (+)
@@ -65,7 +71,7 @@ executeInstruction (PushArg index) stack args _ =
 executeInstruction (PushEnv name) stack _ env =
     case lookup name env of
         Just value -> Right (value : stack, 1)
-        Nothing -> Left "Error: Variable not found"
+        Nothing -> Left $ "Error: Variable not found: " ++ name
 
 performOperation :: (Int -> Int -> Int) -> Stack -> Either String Stack
 performOperation op (VInt a : VInt b : stack) = Right (VInt (op a b) : stack)
@@ -120,27 +126,6 @@ astToInstructions (AstDefine (Right argList) body) =
 astToInstructions (AstLambda argList body) =
     [Push (VFunc (astToInstructions (AstCall [AstDefine (Right argList) body])))]
 
-main' :: String -> IO ()
-main' filePath = do
-    contents <- readFile filePath
-    putStrLn "Contenu du fichier :"
-    putStrLn contents
-    let linesOfFile = lines contents
-    let instructions = mapMaybe parseInstruction linesOfFile
-    putStrLn "Instructions lues du fichier :"
-    mapM_ print instructions
-    let initialStack = []
-    putStrLn "instruction"
-    putStrLn $ show instructions
-    let env = [("abs", VFunc instructions)]
-    putStrLn "env :"
-    putStrLn $ show env
-    case exec instructions initialStack [VInt (-42)] env 0 of
-        Right resultStack -> case resultStack of
-            (VInt result : _) -> print result
-            _ -> putStrLn $ show resultStack
-        Left errorMsg -> putStrLn errorMsg
-
 instructionToOpcode :: Instruction -> Put
 instructionToOpcode (Push value) = do
     putWord8 0x01
@@ -174,17 +159,45 @@ instructionsToBytecode instrs = forM_ instrs instructionToOpcode
 writeBytecodeToFile :: FilePath -> Put -> IO ()
 writeBytecodeToFile filePath bytecodePut = encodeFile filePath (runPut bytecodePut)
 
--- main :: IO ()
--- main = do
---     let exampleAst = AstCall [AstDefine (Left "add") (AstCall [AstSymbol "lambda",AstCall [AstSymbol "a",AstSymbol "b"],AstCall [AstSymbol "+",AstSymbol "a",AstSymbol "b"]]),AstCall [AstSymbol "add",AstInteger 3,AstInteger 4]]
+main :: String -> IO ()
+main filePath = do
+    contents <- readFile filePath
+    putStrLn "\nContenu du fichier:"
+    putStrLn contents
 
---     let instructions = astToInstructions exampleAst
---     putStrLn "Instructions generated from the AST:"
+    let newAst = read contents :: Ast
+    putStrLn "Ast:"
+    putStrLn $ show newAst
+
+    let instructions = astToInstructions newAst
+    putStrLn "Instructions generated from the AST:"
+    mapM_ print instructions
+
+    putStrLn "\nBytecode generated:"
+    let bytecode = runPut $ instructionsToBytecode instructions
+    BL.putStr bytecode
+    putStrLn ""
+    let outputFilePath = "vm_bytecode.bin"
+    writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
+    putStrLn $ "Bytecode written to file: " ++ outputFilePath
+
+-- main' :: String -> IO ()
+-- main' filePath = do
+--     contents <- readFile filePath
+--     putStrLn "Contenu du fichier :"
+--     putStrLn contents
+--     let linesOfFile = lines contents
+--     let instructions = mapMaybe parseInstruction linesOfFile
+--     putStrLn "Instructions lues du fichier :"
 --     mapM_ print instructions
---     putStrLn "\nBytecode generated:"
---     let bytecode = runPut $ instructionsToBytecode instructions
---     BL.putStr bytecode
---     putStrLn ""
---     let outputFilePath = "vm_bytecode.bin"
---     writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
---     putStrLn $ "Bytecode written to file: " ++ outputFilePath
+--     let initialStack = []
+--     putStrLn "instruction"
+--     putStrLn $ show instructions
+--     let env = [("abs", VFunc instructions)]
+--     putStrLn "env :"
+--     putStrLn $ show env
+--     case exec instructions initialStack [VInt (-42)] env 0 of
+--         Right resultStack -> case resultStack of
+--             (VInt result : _) -> print result
+--             _ -> putStrLn $ show resultStack
+--         Left errorMsg -> putStrLn errorMsg
