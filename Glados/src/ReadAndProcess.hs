@@ -45,10 +45,10 @@ processLine :: String -> IO ()
 processLine line = do
     if null line
         then putStrLn "Please write something"
-        else putStrLn $ show $ cptListToAst $ tokenToCpt $ stringToToken line
+        else putStrLn $ show $ cptListToAstList $ tokenToCpt $ ("(" : stringToToken line)
 
 processContent :: String -> IO ()
 processContent content = do
     if null content
         then putStrLn "Please write something"
-        else putStrLn $ show $ cptListToAst $ tokenToCpt $ stringToToken content
+        else putStrLn $ show $ cptListToAstList $ tokenToCpt $ ("(" : stringToToken content)
