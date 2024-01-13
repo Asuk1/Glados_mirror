@@ -200,7 +200,3 @@ evaluate (AstSymbol x) env = getValue (AstSymbol x) env
 evaluate (AstCall x) env = funcValue x env
 evaluate (AstDefine _ _) _ = Err "Define not supported yet"
 evaluate (AstLambda _ _) _ = Err "Lambda not supported yet"
-
-printEval :: [Result] -> IO ()
-printEval [] = return ()
-printEval (x:xs) = putStrLn (show x) >> printEval xs
