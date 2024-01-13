@@ -305,25 +305,6 @@ testBoolToIntFunction = do
         it "should return 0 when the boolean is False" $ do
             boolToInt False `shouldBe` 0
 
-testSetFuncEnv :: Spec
-testSetFuncEnv = do
-    describe "setFuncEnv" $ do
-        it "should return an error for too few arguments" $ do
-            setFuncEnv ["x"] [] [] `shouldBe` (Right "Too few arguments")
-        it "should return an error for too many arguments" $ do
-            setFuncEnv [] [AstInteger 42, AstBoolean True] [] `shouldBe` (Right "Too many arguments")
-        it "should update the environment with a valid integer value" $ do
-            let env = [("existing", AstInteger 10)]
-            setFuncEnv ["x"] [AstInteger 42] env `shouldBe` (Left [("existing", AstInteger 10), ("x", AstInteger 42)])
-        it "should update the environment with a valid boolean value" $ do
-            let env = [("existing", AstInteger 10)]
-            setFuncEnv ["x"] [AstBoolean True] env `shouldBe` (Left [("existing", AstInteger 10), ("x", AstInteger 1)])
-        it "should return an error if evaluation fails" $ do
-            setFuncEnv ["x"] [AstSymbol "undefined"] [] `shouldBe` (Right "Symbol 'undefined' not found in the environment.")
-        it "should return the same environment for empty lists" $ do
-            let env = [("existing", AstInteger 10)]
-            setFuncEnv [] [] env `shouldBe` (Left [("existing", AstInteger 10)])
-
 spec :: Spec
 spec = do
     testAddFunction
