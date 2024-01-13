@@ -20,9 +20,7 @@ module Vm (
     factOp,
     divOp,
     subOp,
-    resultFromInstruction,
     executer,
-    stringToToken
     ) where
 
 import Data.Maybe (mapMaybe)
@@ -124,6 +122,7 @@ parseInstruction line = case words line of
     ("JumpIfFalse" : offset : []) -> Just $ JumpIfFalse (read offset)
     ("PushArg" : index : []) -> Just $ PushArg (read index)
     ("PushEnv" : name : []) -> Just $ PushEnv name
+    ("Define" : []) -> Just Define
     _ -> Nothing
 
 parseOp :: String -> Op
@@ -138,14 +137,29 @@ parseOp op = case op of
     "Succ" -> Succ
     _ -> error "Unknown operation"
 
+createEnv :: [Instruction] -> Env
+createEnv instructions = go instructions []
+  where
+    go [] env = env
+    go (Define : PushEnv var : Push value : rest) env = go rest ((var, value) : env)
+    go (_ : rest) env = go rest env
+
 astToInstructions :: Ast -> [Instruction]
 astToInstructions (AstInteger n) = [Push (VInt n)]
+astToInstructions (AstSymbol "+") = [Push (VOp Add)]
+astToInstructions (AstSymbol "-") = [Push (VOp Sub)]
+astToInstructions (AstSymbol "*") = [Push (VOp Mul)]
+astToInstructions (AstSymbol "/") = [Push (VOp Div)]
+astToInstructions (AstSymbol "<") = [Push (VOp Less)]
+astToInstructions (AstSymbol "=") = [Push (VOp Equal)]
+astToInstructions (AstSymbol "fact") = [Push (VOp Fact)]
+astToInstructions (AstSymbol "succ") = [Push (VOp Succ)]
 astToInstructions (AstSymbol s) = [PushEnv s]
 astToInstructions (AstBoolean b) = [Push (VBool (read b))]
 astToInstructions (AstDefine (Left var) body) =
-    PushEnv var : astToInstructions body ++ [Define]
-astToInstructions (AstCall [AstSymbol name, arg1, arg2]) =
-    [PushEnv name] ++ astToInstructions arg1 ++ astToInstructions arg2 ++ [Call]
+    [Define] ++ PushEnv var : astToInstructions body
+astToInstructions (AstCall [name, arg1, arg2]) =
+    astToInstructions arg1 ++ astToInstructions arg2 ++ astToInstructions name ++ [Call]
 astToInstructions (AstCall astList) = concatMap astToInstructions astList
 astToInstructions (AstDefine (Right argList) body) =
     astToInstructions (AstCall [AstDefine (Right argList) body])
@@ -177,13 +191,6 @@ compiler filePath = do
 removeUnwantedChars :: String -> String
 removeUnwantedChars = filter (\c -> c /= '(' && c /= ')' && c /= '"')
 
-stringToToken :: String -> [String]
-stringToToken [] = []
-stringToToken (x:xs)
-  | x == '(' = "(" : stringToToken xs
-  | x == ')' = ")" : stringToToken xs
-  | otherwise = (x : takeWhile (`notElem` " \t\n();") xs) : stringToToken (dropWhile (`notElem` " \t\n();") xs)
-
 executer :: String -> IO ()
 executer filePath = do
     contents <- readFile filePath
@@ -194,27 +201,23 @@ executer filePath = do
     putStrLn "Contenu du fichier sans les charactères indésirables:\n"
     putStrLn tmp
 
-resultFromInstruction :: String -> IO ()
-resultFromInstruction filePath = do
-    contents <- readFile filePath
-    putStrLn "Contenu du fichier :"
-    putStrLn contents
+    let instruction = mapMaybe parseInstruction (lines tmp)
 
-    let linesOfFile = lines contents
-    let instructions = mapMaybe parseInstruction linesOfFile
-    putStrLn "Instructions lues du fichier :"
-    mapM_ print instructions
+    let env = createEnv instruction
+    putStrLn "Env :"
+    putStrLn $ show env
 
     let initialStack = []
     putStrLn "instruction"
-    putStrLn $ show instructions
+    putStrLn $ show instruction
 
-    let env = [("abs", VFunc instructions)]
     putStrLn "env :"
     putStrLn $ show env
-    case exec instructions initialStack [VInt (-42)] env 0 of
+    case exec instruction initialStack [VInt (-42)] env 0 of
         Right resultStack -> case resultStack of
-            (VInt result : _) -> print result
+            (VInt result : _) -> do
+                putStrLn $ show result
+                putStrLn $ show resultStack
             _ ->
                 putStrLn $ show resultStack
         Left errorMsg -> putStrLn errorMsg

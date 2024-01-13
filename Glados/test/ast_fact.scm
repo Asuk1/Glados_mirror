@@ -1,0 +1,1 @@
+[AstDefine (Left "x") (AstInteger 42),AstCall [AstSymbol "fact",AstSymbol "x",AstInteger 5]]
