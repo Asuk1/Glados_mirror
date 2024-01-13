@@ -6,30 +6,21 @@ import Vm (Op(..), Value(..), opToFunction, performOperation, executeInstruction
 sampleEnv :: [(String, Value)]
 sampleEnv = [("var1", VInt 42), ("var2", VBool True)]
 
-simpleCode :: [Vm.Instruction]
-simpleCode =
-  [ Push (VInt 42)
-  , Push (VInt 3)
-  , Push (VOp Add)
-  , Call
-  , Ret
-  ]
-
 spec :: Spec
 spec = do
   describe "Op to Function Tests" $ do
     it "Add" $ do
       let opFunction = opToFunction Add
-      opFunction 2 3 `shouldBe` 5
+      performBinaryOperation opFunction 2 3 `shouldBe` 5
     it "Sub" $ do
       let opFunction = opToFunction Sub
-      opFunction 5 2 `shouldBe` 3
+      performBinaryOperation opFunction 5 2 `shouldBe` (-3)
     it "Mul" $ do
       let opFunction = opToFunction Mul
-      opFunction 2 3 `shouldBe` 6
+      performBinaryOperation opFunction 2 3 `shouldBe` 6
     it "Div" $ do
       let opFunction = opToFunction Div
-      opFunction 6 2 `shouldBe` 3
+      performBinaryOperation opFunction 6 2 `shouldBe` 3
 
   describe "Perform Operation Tests" $ do
     it "Add" $
@@ -54,3 +45,17 @@ spec = do
   describe "Exec Tests" $ do
     it "Simple Program" $
       exec simpleCode [] [] sampleEnv 0 `shouldBe` Right [VInt 45]
+
+performBinaryOperation :: Either a (Int -> Int -> Int) -> Int -> Int -> Int
+performBinaryOperation opFunction a b = case opFunction of
+  Right binaryOp -> binaryOp a b
+  _ -> error "Unexpected unary operation"
+
+simpleCode :: [Instruction]
+simpleCode =
+  [ Push (VInt 42)
+  , Push (VInt 3)
+  , Push (VOp Add)
+  , Call
+  , Ret
+  ]
