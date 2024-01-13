@@ -1,4 +1,4 @@
-name: Build - Test - Miror - Release
+name: Build - Test - Miror
 
 on:
   push:
@@ -69,51 +69,3 @@ jobs:
         with:
           target_repo_url: ${{ env.MIRROR_URL }}
           ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
-
-  create-release:
-    name: Release
-    needs: mirror
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Zip the Glados
-        run: |
-          cd Glados
-          zip -r glados-project-${{ github.run_number }}.zip .
-          stack build --install-ghc --allow-different-user
-          cp $(stack path --local-install-root)/bin/glados ./glados
-          zip glados-${{ github.run_number }}.zip glados
-          ls -l
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
-          body: |
-            Changes Glados version
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Glados/glados-project-${{ github.run_number }}.zip
-          asset_name: glados-project-${{ github.run_number }}.zip
-          asset_content_type: application/zip
-      - name: Upload Release Asset (glados-executable)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Glados/glados-${{ github.run_number }}.zip
-          asset_name: glados-${{ github.run_number }}.zip
-          asset_content_type: application/zip
