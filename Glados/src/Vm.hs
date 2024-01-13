@@ -16,20 +16,13 @@ module Vm (
     parseInstruction,
     parseOp,
     astToInstructions,
-    instructionToOpcode,
-    valueToOpcode,
-    instructionsToBytecode,
-    writeBytecodeToFile,
     compiler,
     factOp,
     divOp,
-    subOp
+    subOp,
+    resultFromInstruction
     ) where
 
-import Data.Binary (encodeFile)
-import Control.Monad (forM_)
-import Data.Binary.Put (Put, runPut, putWord8, putWord32le)
-import qualified Data.ByteString.Lazy as BL
 import Data.Maybe (mapMaybe)
 
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
@@ -147,78 +140,40 @@ astToInstructions :: Ast -> [Instruction]
 astToInstructions (AstInteger n) = [Push (VInt n)]
 astToInstructions (AstSymbol s) = [PushEnv s]
 astToInstructions (AstBoolean b) = [Push (VBool (read b))]
-astToInstructions (AstCall [AstDefine (Left var) body, args]) =
-    [PushEnv var] ++ astToInstructions body ++ [Define] ++ astToInstructions args ++ [Call]
+astToInstructions (AstDefine (Left var) body) =
+    PushEnv var : astToInstructions body ++ [Define]
 astToInstructions (AstCall [AstSymbol name, arg1, arg2]) =
     [PushEnv name] ++ astToInstructions arg1 ++ astToInstructions arg2 ++ [Call]
-astToInstructions (AstCall [AstLambda argList body, args]) =
-    astToInstructions (AstCall [AstDefine (Right argList) body, args])
 astToInstructions (AstCall astList) = concatMap astToInstructions astList
 astToInstructions (AstDefine (Right argList) body) =
     astToInstructions (AstCall [AstDefine (Right argList) body])
-astToInstructions (AstLambda argList body) =
-    [Push (VFunc (astToInstructions (AstCall [AstDefine (Right argList) body])))]
+astToInstructions (AstLambda _ body) =
+    [Push (VFunc (astToInstructions body))]
 astToInstructions _ = []
-
-instructionToOpcode :: Instruction -> Put
-instructionToOpcode (Push value) = do
-    putWord8 0x01
-    valueToOpcode value
-instructionToOpcode Pop = putWord8 0x02
-instructionToOpcode Call = putWord8 0x03
-instructionToOpcode Ret = putWord8 0x04
-instructionToOpcode (JumpIfFalse offset) = do
-    putWord8 0x07
-    putWord32le $ fromIntegral offset
-instructionToOpcode (PushArg index) = do
-    putWord8 0x08
-    putWord32le $ fromIntegral index
-instructionToOpcode (PushEnv name) = do
-    putWord8 0x09
-    putWord32le $ fromIntegral (length name)
-    mapM_ putWord8 (map (fromIntegral . fromEnum) name)
-instructionToOpcode Define = putWord8 0x0A
-
-valueToOpcode :: Value -> Put
-valueToOpcode (VInt n) = do
-    putWord8 0x05
-    putWord32le $ fromIntegral n
-valueToOpcode (VBool b) = do
-    putWord8 0x06
-    putWord8 $ if b then 0xFF else 0x00
-
-instructionsToBytecode :: [Instruction] -> Put
-instructionsToBytecode instrs = forM_ instrs instructionToOpcode
-
-writeBytecodeToFile :: FilePath -> Put -> IO ()
-writeBytecodeToFile filePath bytecodePut = encodeFile filePath (runPut bytecodePut)
 
 compiler :: String -> IO ()
 compiler filePath = do
     contents <- readFile filePath
-    putStrLn "\nContenu du fichier:"
+    putStrLn "\nContenu du fichier:\n"
     putStrLn contents
+    putStrLn "\n"
 
     let astList = read contents :: [Ast]
-    putStrLn "Liste d'Ast convertie:"
+    putStrLn "Liste d'Ast convertie:\n"
     mapM_ (putStrLn . show) astList
+    putStrLn "\n"
 
-    putStrLn "Liste d'Ast:"
-    mapM_ (putStrLn . show) astList
     let instructions = concatMap astToInstructions astList
-    putStrLn "Instructions generated from the AST:"
+    putStrLn "Instructions généré depuis le fichier AST:\n"
     mapM_ print instructions
+    putStrLn "\n"
 
-    putStrLn "\nBytecode generated:"
-    let bytecode = runPut $ instructionsToBytecode instructions
-    BL.putStr bytecode
-    putStrLn ""
-    let outputFilePath = "vm_bytecode.bin"
-    writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
-    putStrLn $ "Bytecode written to file: " ++ outputFilePath
+    let outputFilePath = "instructions.txt"
+    writeFile outputFilePath (unlines $ map show instructions)
+    putStrLn $ "Instructions écrites dans le fichier: " ++ outputFilePath
 
-main :: String -> IO ()
-main filePath = do
+resultFromInstruction :: String -> IO ()
+resultFromInstruction filePath = do
     contents <- readFile filePath
     putStrLn "Contenu du fichier :"
     putStrLn contents
