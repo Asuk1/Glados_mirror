@@ -20,7 +20,9 @@ module Vm (
     factOp,
     divOp,
     subOp,
-    resultFromInstruction
+    resultFromInstruction,
+    executer,
+    stringToToken
     ) where
 
 import Data.Maybe (mapMaybe)
@@ -171,6 +173,26 @@ compiler filePath = do
     let outputFilePath = "instructions.txt"
     writeFile outputFilePath (unlines $ map show instructions)
     putStrLn $ "Instructions écrites dans le fichier: " ++ outputFilePath
+
+removeUnwantedChars :: String -> String
+removeUnwantedChars = filter (\c -> c /= '(' && c /= ')' && c /= '"')
+
+stringToToken :: String -> [String]
+stringToToken [] = []
+stringToToken (x:xs)
+  | x == '(' = "(" : stringToToken xs
+  | x == ')' = ")" : stringToToken xs
+  | otherwise = (x : takeWhile (`notElem` " \t\n();") xs) : stringToToken (dropWhile (`notElem` " \t\n();") xs)
+
+executer :: String -> IO ()
+executer filePath = do
+    contents <- readFile filePath
+    putStrLn "\nContenu du fichier:\n"
+    putStrLn contents
+
+    let tmp = removeUnwantedChars contents
+    putStrLn "Contenu du fichier sans les charactères indésirables:\n"
+    putStrLn tmp
 
 resultFromInstruction :: String -> IO ()
 resultFromInstruction filePath = do

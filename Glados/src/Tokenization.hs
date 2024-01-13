@@ -1,3 +1,10 @@
+--
+-- EPITECH PROJECT, 2024
+-- Glados_mirror
+-- File description:
+-- Tokenization
+--
+
 module Tokenization
     (
         stringToToken,
