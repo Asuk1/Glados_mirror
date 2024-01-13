@@ -20,15 +20,20 @@ module Vm (
     valueToOpcode,
     instructionsToBytecode,
     writeBytecodeToFile,
+    compiler,
+    factOp,
+    divOp,
+    subOp
     ) where
 
 import Data.Binary (encodeFile)
 import Control.Monad (forM_)
 import Data.Binary.Put (Put, runPut, putWord8, putWord32le)
 import qualified Data.ByteString.Lazy as BL
+import Data.Maybe (mapMaybe)
 
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
-data Op = Add | Sub | Mul | Div | Less| Fact | Succ | Equal deriving (Show, Eq)
+data Op = Add | Sub | Mul | Div | Less | Fact | Succ | Equal deriving (Show, Eq)
 data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String | Define deriving (Show, Eq)
 type Stack = [Value]
 type Env = [(String, Value)]
@@ -39,15 +44,35 @@ data Ast = AstInteger Int
     | AstDefine (Either String [String]) Ast
     | AstLambda [String] Ast deriving (Read, Show, Eq)
 
-opToFunction :: Op -> (Int -> Int -> Int)
-opToFunction Add = (+)
-opToFunction Sub = (-)
-opToFunction Mul = (*)
-opToFunction Div = div
-opToFunction Less = \a b -> if a < b then 1 else 0
-opToFunction Equal = \a b -> if a == b then 1 else 0
-opToFunction Fact = \a _ -> if a <= 1 then 1 else a * opToFunction Fact (a - 1) 1
-opToFunction Succ = \a _ -> a + 1
+type UnaryOp = Int -> Int
+type BinaryOp = Int -> Int -> Int
+
+opToFunction :: Op -> Either UnaryOp BinaryOp
+opToFunction Add = Right (+)
+opToFunction Sub = Right subOp
+opToFunction Mul = Right (*)
+opToFunction Div = Right divOp
+opToFunction Less = Right (\a b -> if a < b then 1 else 0)
+opToFunction Equal = Right (\a b -> if a == b then 1 else 0)
+opToFunction Fact = Left factOp
+opToFunction Succ = Left (\a -> a + 1)
+
+factOp :: UnaryOp
+factOp a =
+    if a <= 1 then
+        1
+    else
+        a * factOp (a - 1)
+
+divOp :: BinaryOp
+divOp a b
+    | b == 0    = error "Division by zero"
+    | otherwise = fromIntegral a `div'` fromIntegral b
+    where div' :: Double -> Double -> Int
+          div' x y = round (x / y)
+
+subOp :: BinaryOp
+subOp a b = b - a
 
 executeInstruction :: Instruction -> Stack -> [Value] -> Env -> Either String (Stack, Int)
 executeInstruction Define stack _ _ = Right (stack, 1)
@@ -55,9 +80,15 @@ executeInstruction (Push value) stack _ _ = Right (value : stack, 1)
 executeInstruction Pop [] _ _ = Left "Error: Not enough arguments on stack"
 executeInstruction Pop (_:stack) _ _ = Right (stack, 1)
 executeInstruction Call (VOp op : stack) _ _ =
-    case performOperation (opToFunction op) stack of
-        Right newStack -> Right (newStack, 1)
-        Left errorMsg -> Left errorMsg
+    case opToFunction op of
+        Left unaryOp ->
+            case stack of
+                (VInt a : rest) -> Right (VInt (unaryOp a) : rest, 1)
+                _ -> Left "Error: Not enough arguments for unary operation"
+        Right binaryOp ->
+            case stack of
+                (VInt a : VInt b : rest) -> Right (VInt (binaryOp a b) : rest, 1)
+                _ -> Left "Error: Invalid arguments for binary operation"
 executeInstruction Call (VFunc func : stack) args env =
     case exec func [] args env 0 of
         Right retStack -> Right (head retStack : stack, 1)
@@ -72,7 +103,7 @@ executeInstruction (PushArg index) stack args _ =
 executeInstruction (PushEnv name) stack _ env =
     case lookup name env of
         Just value -> Right (value : stack, 1)
-        Nothing -> Left $ "Error: Variable not found: " ++ name
+        Nothing -> Left "Error: Variable not found"
 
 performOperation :: (Int -> Int -> Int) -> Stack -> Either String Stack
 performOperation op (VInt a : VInt b : stack) = Right (VInt (op a b) : stack)
@@ -186,31 +217,27 @@ compiler filePath = do
     writeBytecodeToFile outputFilePath $ instructionsToBytecode instructions
     putStrLn $ "Bytecode written to file: " ++ outputFilePath
 
-executer:: String -> IO ()
-executer filepath = do
-    contents <- readFile filepath
-    putStrLn "\nContenu du fichier:"
+main :: String -> IO ()
+main filePath = do
+    contents <- readFile filePath
+    putStrLn "Contenu du fichier :"
     putStrLn contents
 
--- main :: String -> IO ()
--- main filePath = do
---     putStrLn $ "Reading bytecode file: " ++ filePath
---     instructions <- readBytecodeFile filePath
---     putStrLn "Instructions read from the bytecode file:"
---     mapM_ print instructions
+    let linesOfFile = lines contents
+    let instructions = mapMaybe parseInstruction linesOfFile
+    putStrLn "Instructions lues du fichier :"
+    mapM_ print instructions
 
--- let linesOfFile = lines contents
--- let instructions = mapMaybe parseInstruction linesOfFile
--- putStrLn "Instructions lues du fichier :"
--- mapM_ print instructions
--- let initialStack = []
--- putStrLn "instruction"
--- putStrLn $ show instructions
--- let env = [("abs", VFunc instructions)]
--- putStrLn "env :"
--- putStrLn $ show env
--- case exec instructions initialStack [VInt (-42)] env 0 of
---     Right resultStack -> case resultStack of
---         (VInt result : _) -> print result
---         _ -> putStrLn $ show resultStack
---     Left errorMsg -> putStrLn errorMsg
+    let initialStack = []
+    putStrLn "instruction"
+    putStrLn $ show instructions
+
+    let env = [("abs", VFunc instructions)]
+    putStrLn "env :"
+    putStrLn $ show env
+    case exec instructions initialStack [VInt (-42)] env 0 of
+        Right resultStack -> case resultStack of
+            (VInt result : _) -> print result
+            _ ->
+                putStrLn $ show resultStack
+        Left errorMsg -> putStrLn errorMsg
