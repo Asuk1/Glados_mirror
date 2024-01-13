@@ -56,7 +56,6 @@ jobs:
           bash functionnal_test.sh
 
   mirror:
-    needs: functional-test
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
@@ -72,7 +71,7 @@ jobs:
 
   create-release:
     name: Release
-    needs: mirror
+    needs: [mirror, functional-test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
