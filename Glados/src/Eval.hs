@@ -16,6 +16,9 @@ module Eval
         equal,
         ifFunction,
         callFunc,
+        evaluate,
+        boolToInt,
+        setFuncEnv,
         Result (..),
     ) where
 
@@ -143,7 +146,7 @@ setFuncEnv (_:_) [] _ = Right "Too few arguments"
 setFuncEnv [] (_:_) _ = Right "Too many arguments"
 setFuncEnv [] [] env = Left env
 setFuncEnv (x:xs) (y:ys) env =
-    case getValue y env of
+    case evaluate y env of
         Value s -> setFuncEnv xs ys (addKeyVal x (AstInteger s) env)
         Boolean s -> setFuncEnv xs ys (addKeyVal x (AstInteger (boolToInt s)) env)
         Err s -> Right s
@@ -163,8 +166,8 @@ getBuiltins = [
 isBuild :: [Ast] -> Env -> Result
 isBuild [] _ = (Boolean False)
 isBuild (AstSymbol a:b) env = case lookup a getBuiltins of
-                    Nothing -> Boolean False
-                    Just ab -> ab b env
+    Nothing -> Boolean False
+    Just ab -> ab b env
 isBuild _ _ = Err "Bad call"
 
 funcValue :: [Ast] -> Env -> Result
@@ -182,21 +185,21 @@ funcValue x env = case isBuild x env of
 callFunc :: [Ast] -> Env -> Result
 callFunc (AstLambda a x:[]) env = case (length a) == 0 of
     False -> (Err ("Incorrect Lambda call"))
-    True -> eval x env
+    True -> evaluate x env
 callFunc (AstLambda a x:b) env = case (length a) == (length b) of
     False -> (Err ("Incorrect Lambda call"))
     True -> case setFuncEnv a b env of
-        Left envi -> eval x envi
+        Left envi -> evaluate x envi
         Right err -> (Err err)
 callFunc _ _ = (Err "Invalid function call")
 
-eval :: Ast -> Env -> Result
-eval (AstInteger x) _ = Value x
-eval (AstBoolean x) _ = Boolean x
-eval (AstSymbol x) env = getValue (AstSymbol x) env
-eval (AstCall x) env = funcValue x env
-eval (AstDefine _ _) _ = Err "Define not supported yet"
-eval (AstLambda _ _) _ = Err "Lambda not supported yet"
+evaluate :: Ast -> Env -> Result
+evaluate (AstInteger x) _ = Value x
+evaluate (AstBoolean x) _ = Boolean x
+evaluate (AstSymbol x) env = getValue (AstSymbol x) env
+evaluate (AstCall x) env = funcValue x env
+evaluate (AstDefine _ _) _ = Err "Define not supported yet"
+evaluate (AstLambda _ _) _ = Err "Lambda not supported yet"
 
 printEval :: [Result] -> IO ()
 printEval [] = return ()
