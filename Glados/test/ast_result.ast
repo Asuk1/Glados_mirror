@@ -1,0 +1,1 @@
+[AstDefine (Left "x") (AstInteger 42)]

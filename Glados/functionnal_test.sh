@@ -1,4 +1,10 @@
 #!/bin/bash
+##
+## EPITECH PROJECT, 2024
+## Glados_mirror
+## File description:
+## functionnal_test
+##
 
 check_executable() {
     local current_directory="$(pwd)"
@@ -45,11 +51,12 @@ run_test() {
     fi
 }
 
-
-
-
 #check_executable "$executable_name"
-
-run_test "test/test_simple.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]
-[CptList [CptSymbols \"+\",CptSymbols \"x\",CptInt 32]]" "Test simple"
-run_test "test/test.scm" "[CptList [CptSymbols \"define\",CptSymbols \"x\",CptInt 42]]" "Test"
+run_test "test/test_simple.scm" "74" "Test simple add"
+run_test "test/test_simple_mult.scm" "60" "Test simple mult"
+run_test "test/test_simple_div.scm" "5" "Test simple div"
+run_test "test/test_simple_sub.scm" "20" "Test simple sub"
+run_test "test/test_bigger.scm" "1" "Test Bigger"
+run_test "test/test_less.scm" "1" "Test less"
+run_test "test/test_bigger.scm" "1" "Test Bigger"
+run_test "test/test_succ.scm" "11" "Test Succ"

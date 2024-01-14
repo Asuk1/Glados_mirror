@@ -56,7 +56,6 @@ jobs:
           bash functionnal_test.sh
 
   mirror:
-    needs: functional-test
     runs-on: ubuntu-latest
     steps:
       - name: Check repository
@@ -72,7 +71,7 @@ jobs:
 
   create-release:
     name: Release
-    needs: mirror
+    needs: [mirror, functional-test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -81,9 +80,9 @@ jobs:
       - name: Zip the Glados
         run: |
           cd Glados
-          zip -r glados-project-${{ github.run_number }}.zip .
           stack build --install-ghc --allow-different-user
           cp $(stack path --local-install-root)/bin/glados ./glados
+          zip -r glados-project-${{ github.run_number }}.zip .
           zip glados-${{ github.run_number }}.zip glados
           ls -l
 

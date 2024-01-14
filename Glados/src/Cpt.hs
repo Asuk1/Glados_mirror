@@ -33,7 +33,9 @@ parseList tokens =
 parseElement :: [String] -> (Cpt, [String])
 parseElement [] = error "parseElement called with an empty list"
 parseElement (token : xs)
-    | (head token == '-' && all isDigit (tail token)) || all isDigit token = (CptInt (read token), xs)
+    | all isDigit token = (CptInt (read token), xs)
+    | token == "-" = (CptSymbols "-", xs)
+    | head token == '-' && all isDigit (tail token) = (CptInt (read token), xs)
     | token == "(" =
         let (cptList, rest) = parseList xs
         in (CptList cptList, rest)

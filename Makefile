@@ -24,6 +24,7 @@ fclean:
 
 re:
 	$(MAKE) -C $(GLADOS_DIRECTORY) re
+	@cp $(GLADOS_EXECUTABLE) .
 
 tests_run:
 	$(MAKE) -C $(GLADOS_DIRECTORY) tests_run
