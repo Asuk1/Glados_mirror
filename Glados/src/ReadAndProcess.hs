@@ -52,7 +52,6 @@ processLine line = do
             if open == close
                 then case cptListToAstList (tokenToCpt tokens) of
                         Just astList -> do
-                            putStrLn $ show astList
                             writeAstListToFile "ast_result.txt" astList
                             compiler "ast_result.txt"
                             executer "instructions.txt"
@@ -69,7 +68,6 @@ processContent content = do
             if open == close
                 then case cptListToAstList (tokenToCpt tokens) of
                         Just astList -> do
-                            putStrLn $ show astList
                             writeAstListToFile "ast_result.txt" astList
                             compiler "ast_result.txt"
                             executer "instructions.txt"

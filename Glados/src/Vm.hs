@@ -167,57 +167,33 @@ astToInstructions (AstLambda _ body) =
     [Push (VFunc (astToInstructions body))]
 astToInstructions _ = []
 
-compiler :: String -> IO ()
-compiler filePath = do
-    contents <- readFile filePath
-    putStrLn "\nContenu du fichier:\n"
-    putStrLn contents
-    putStrLn "\n"
-
-    let astList = read contents :: [Ast]
-    putStrLn "Liste d'Ast convertie:\n"
-    mapM_ (putStrLn . show) astList
-    putStrLn "\n"
-
-    let instructions = concatMap astToInstructions astList
-    putStrLn "Instructions généré depuis le fichier AST:\n"
-    mapM_ print instructions
-    putStrLn "\n"
-
-    let outputFilePath = "instructions.txt"
-    writeFile outputFilePath (unlines $ map show instructions)
-    putStrLn $ "Instructions écrites dans le fichier: " ++ outputFilePath
-
 removeUnwantedChars :: String -> String
 removeUnwantedChars = filter (\c -> c /= '(' && c /= ')' && c /= '"')
 
+compiler :: String -> IO ()
+compiler filePath = do
+
+    contents <- readFile filePath
+    let astList = read contents :: [Ast]
+    let instructions = concatMap astToInstructions astList
+
+    let outputFilePath = "instructions.txt"
+    writeFile outputFilePath (unlines $ map show instructions)
+
 executer :: String -> IO ()
 executer filePath = do
+
     contents <- readFile filePath
-    putStrLn "\nContenu du fichier:\n"
-    putStrLn contents
-
     let tmp = removeUnwantedChars contents
-    putStrLn "Contenu du fichier sans les charactères indésirables:\n"
-    putStrLn tmp
-
     let instruction = mapMaybe parseInstruction (lines tmp)
 
     let env = createEnv instruction
-    putStrLn "Env :"
-    putStrLn $ show env
-
     let initialStack = []
-    putStrLn "instruction"
-    putStrLn $ show instruction
 
-    putStrLn "env :"
-    putStrLn $ show env
     case exec instruction initialStack [VInt (-42)] env 0 of
         Right resultStack -> case resultStack of
             (VInt result : _) -> do
                 putStrLn $ show result
-                putStrLn $ show resultStack
             _ ->
                 putStrLn $ show resultStack
         Left errorMsg -> putStrLn errorMsg
