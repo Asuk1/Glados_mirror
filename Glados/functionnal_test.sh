@@ -51,11 +51,7 @@ run_test() {
     fi
 }
 
-
-
-
 #check_executable "$executable_name"
-
-run_test "test/test_simple.scm" "[AstDefine (Left \"x\") (AstInteger 42),AstCall [AstSymbol \"+\",AstSymbol \"x\",AstInteger 32]]" "Test simple"
-run_test "test/test.scm" "[AstDefine (Left \"x\") (AstInteger 42)]" "Test"
-run_test "test/test_hard.scm" "[AstDefine (Left \"add\") (AstCall [AstSymbol \"lambda\",AstCall [AstSymbol \"a\",AstSymbol \"b\"],AstCall [AstSymbol \"+\",AstSymbol \"a\",AstSymbol \"b\"]]),AstCall [AstSymbol \"add\",AstInteger 3,AstInteger 4]]" "Test hard"
+run_test "test/test_simple.scm" "74" "Test simple add"
+run_test "test/test_simple_mult.scm" "60" "Test simple mult"
+run_test "test/test_simple_div.scm" "5" "Test simple div"

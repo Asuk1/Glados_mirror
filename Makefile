@@ -13,7 +13,7 @@ GLADOS_MAKEFILE = $(GLADOS_DIRECTORY)/Makefile
 
 all:
 	$(MAKE) -C $(GLADOS_DIRECTORY)
-	@cp $(GLADOS_EXECUTABLE) .
+	@mv $(GLADOS_EXECUTABLE) .
 
 clean:
 	$(MAKE) -C $(GLADOS_DIRECTORY) clean
@@ -24,6 +24,7 @@ fclean:
 
 re:
 	$(MAKE) -C $(GLADOS_DIRECTORY) re
+	@mv $(GLADOS_EXECUTABLE) .
 
 tests_run:
 	$(MAKE) -C $(GLADOS_DIRECTORY) tests_run
