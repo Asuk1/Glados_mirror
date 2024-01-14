@@ -34,10 +34,6 @@ testParseList = do
         it "parses nested lists" $
             parseList ["(", "define", "(", "x", "42", ")", ")", "(", "define", "y", "43", ")"] `shouldBe`
                 ([CptList [CptSymbols "define", CptList [CptSymbols "x", CptInt 42]], CptList [CptSymbols "define", CptSymbols "y", CptInt 43]], [])
-        -- it "handles incorrect syntax - missing opening parenthesis" $
-        --     parseList ["define", "x", "42", ")"] `shouldBe` ([], ["define", "x", "42", ")"])
-        -- it "handles incorrect syntax - missing closing parenthesis" $
-        --     parseList ["(", "define", "x", "42"] `shouldBe` ([], ["define", "x", "42"])
 
 testTokenToCpt :: Spec
 testTokenToCpt = do
@@ -49,10 +45,6 @@ testTokenToCpt = do
         it "parses a list with multiple elements" $
             tokenToCpt ["(", "define", "x", "42", ")", "(", "define", "y", "43", ")"] `shouldBe`
                 [CptList [CptSymbols "define", CptSymbols "x", CptInt 42], CptList [CptSymbols "define", CptSymbols "y", CptInt 43]]
-        -- it "handles incorrect syntax - missing closing parenthesis" $
-        --     tokenToCpt ["(", "define", "x", "42"] `shouldBe` []
-        -- it "handles incorrect syntax - extra closing parenthesis" $
-        --     tokenToCpt ["(", "define", "x", "42", ")", ")"] `shouldBe` []
 
 spec :: Spec
 spec = do
