@@ -170,6 +170,8 @@ astToInstructions (AstCall [AstSymbol "define", AstCall [AstSymbol func, AstSymb
     [Define] ++ [PushEnv func] ++ PushEnv var : astToInstructions rest
 astToInstructions (AstCall [name, arg1, arg2]) =
     astToInstructions arg1 ++ astToInstructions arg2 ++ astToInstructions name ++ [Call]
+astToInstructions (AstCall [AstSymbol "fact", arg1]) =
+    astToInstructions arg1 ++ astToInstructions (AstSymbol "fact") ++ [Call]
 astToInstructions (AstCall [AstSymbol name, arg1]) =
     astToInstructions arg1 ++ [PushEnv name]
 astToInstructions (AstCall astList) = concatMap astToInstructions astList

@@ -1,2 +1,2 @@
-define x 10;
-fact x 10;
+define x 5;
+fact x;
