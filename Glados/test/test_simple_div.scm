@@ -1,2 +1,2 @@
-define x 8;
-/ x 40;
+define x 40;
+/ x 8;

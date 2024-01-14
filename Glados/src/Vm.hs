@@ -58,14 +58,14 @@ factOp a =
         a * factOp (a - 1)
 
 divOp :: BinaryOp
-divOp a b
+divOp b a
     | b == 0    = error "Division by zero"
     | otherwise = fromIntegral a `div'` fromIntegral b
     where div' :: Double -> Double -> Int
           div' x y = round (x / y)
 
 subOp :: BinaryOp
-subOp a b = b - a
+subOp b a = a - b
 
 executeInstruction :: Instruction -> Stack -> [Value] -> Env -> Either String (Stack, Int)
 executeInstruction Define stack _ _ = Right (stack, 1)
