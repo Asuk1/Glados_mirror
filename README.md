@@ -9,7 +9,7 @@ Le projet Glados est un projet de programmation fonctionnelle en Haskell. Le but
 Une partie LISP qui consiste à implémenter un interpreteur pour un sous-ensemble du langage LISP.
 Et une partie Glados où on doit implémenter notre propre langage de programmation.
 
-## Réparition des tâches première partie du projet ##
+# Première partie du projet #
 
 - [x] Parser
 - [x] CI/CD
@@ -56,7 +56,7 @@ On a des tests sur:
 
 On fait cette commmande:
 
-./glados < <file>
+./glados < \<file>
 
 ## ---------------------------------------- ###
 
@@ -75,14 +75,14 @@ Le but étant de transformer notre lisp en nouveau langage et de créer une VM p
 
 ## USAGE ##
 
-./glados < <file>
+./glados < \<file>
 
-Remplacez <file> par le chemin du fichier contenant le code source dont vous souhaitez obtenir le résultat.
+Remplacez \<file> par le chemin du fichier contenant le code source dont vous souhaitez obtenir le résultat.
 
 ## Exemple de fichier d'entrée ##
 
 define x 42;
-+ x 32;
+\+ x 32;
 
 ## Résultat de fichier d'entrée ##
 
@@ -106,9 +106,9 @@ Call
 Parse le nouveau langage en enlevant des [] et () du lisp et en ajoutant des ;
 
 ## Overview VM ##
-Gère les opérations sous formes de bulletins
-La VM récupère le parsing du nouveau langage et les transforme en liste d'instruction unique et stock cette liste en le compilant dans un fichier
-La VM peut également récupérer ce fichier compiler et executer cette liste d'instruction pour y obtenir un résultat de calcul
+Gère les opérations sous formes de builtin.
+La VM récupère le parsing du nouveau langage et les transforme en liste d'instruction unique et stock cette liste en le compilant dans un fichier.
+La VM peut également récupérer ce fichier compiler et executer cette liste d'instruction pour y obtenir un résultat de calcul.
 
 ## Overview Tests unitaires deuxième partie ##
 
@@ -133,4 +133,4 @@ Identique à la première partie
 
 On fait cette commmande:
 
-./glados < <file>
+./glados < \<file>
