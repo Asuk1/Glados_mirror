@@ -55,3 +55,4 @@ run_test() {
 run_test "test/test_simple.scm" "74" "Test simple add"
 run_test "test/test_simple_mult.scm" "60" "Test simple mult"
 run_test "test/test_simple_div.scm" "5" "Test simple div"
+run_test "test/test_simple_sub.scm" "20" "Test simple sub"

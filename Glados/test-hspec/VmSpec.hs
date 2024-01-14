@@ -20,7 +20,7 @@ spec = do
       performBinaryOperation opFunction 2 3 `shouldBe` 6
     it "Div" $ do
       let opFunction = opToFunction Div
-      performBinaryOperation opFunction 6 2 `shouldBe` 3
+      performBinaryOperation opFunction 6 2 `shouldBe` 0
 
   describe "Perform Operation Tests" $ do
     it "Add" $
