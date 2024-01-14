@@ -49,7 +49,6 @@ opToFunction Less = Right (\a b -> if a < b then 1 else 0)
 opToFunction Bigger = Right (\a b -> if a > b then 1 else 0)
 opToFunction Equal = Right (\a b -> if a == b then 1 else 0)
 opToFunction Fact = Left factOp
-opToFunction Succ = Left (\a -> a + 1)
 
 factOp :: UnaryOp
 factOp a =
@@ -66,7 +65,7 @@ divOp b a
           div' x y = round (x / y)
 
 subOp :: BinaryOp
-subOp b a = a - b
+subOp a b = b - a
 
 executeInstruction :: Instruction -> [Instruction]-> Stack -> [Value] -> Env -> Either String (Stack, Int)
 executeInstruction Define _ stack _ _ = Right (stack, 1)
@@ -139,6 +138,7 @@ parseOp op = case op of
     "Less" -> Less
     "Equal" -> Equal
     "Bigger" -> Bigger
+    "Fact" -> Fact
     _ -> error "Unknown operation"
 
 createEnv :: [Instruction] -> Stack -> Env
@@ -150,8 +150,6 @@ createEnv instructions stack = go instructions stack []
         go rest stack ((var, value) : env)
     go (PushEnv name : PushEnv var : x : y : z : j : rest) stack env =
         go rest stack ((name, VFunc [x, y, z, j]) : (var, (head (if null stack then [VInt 0] else stack))) : env)
-    go (Push (VOp Fact) : PushEnv var : rest) stack env =
-        go rest stack ((var, VFunc [Push (VOp Fact)]) : env)
     go (_ : rest) stack env = go rest stack env
 
 astToInstructions :: Ast -> [Instruction]
@@ -160,6 +158,7 @@ astToInstructions (AstSymbol "+") = [Push (VOp Add)]
 astToInstructions (AstSymbol "-") = [Push (VOp Sub)]
 astToInstructions (AstSymbol "*") = [Push (VOp Mul)]
 astToInstructions (AstSymbol "/") = [Push (VOp Div)]
+astToInstructions (AstSymbol "fact") = [Push (VOp Fact)]
 astToInstructions (AstSymbol "<") = [Push (VOp Less)]
 astToInstructions (AstSymbol ">") = [Push (VOp Bigger)]
 astToInstructions (AstSymbol "=") = [Push (VOp Equal)]
