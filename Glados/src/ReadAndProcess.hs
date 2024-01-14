@@ -16,6 +16,7 @@ import Control.Monad (unless, when)
 import Tokenization
 import Cpt
 import Ast
+import Vm
 
 readStdinAndProcess :: IO ()
 readStdinAndProcess = do
@@ -53,6 +54,8 @@ processLine line = do
                         Just astList -> do
                             putStrLn $ show astList
                             writeAstListToFile "ast_result.txt" astList
+                            compiler "ast_result.txt"
+                            executer "instructions.txt"
                         Nothing -> putStrLn "Syntax Error"
                 else error "Syntax Error"
 
@@ -68,5 +71,7 @@ processContent content = do
                         Just astList -> do
                             putStrLn $ show astList
                             writeAstListToFile "ast_result.txt" astList
+                            compiler "ast_result.txt"
+                            executer "instructions.txt"
                         Nothing -> putStrLn "Syntax Error"
                 else error "Syntax Error"
