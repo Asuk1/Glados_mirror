@@ -45,8 +45,8 @@ opToFunction Add = Right (+)
 opToFunction Sub = Right subOp
 opToFunction Mul = Right (*)
 opToFunction Div = Right divOp
-opToFunction Less = Right (\a b -> if a < b then 1 else 0)
-opToFunction Bigger = Right (\a b -> if a > b then 1 else 0)
+opToFunction Less = Right (\a b -> if a > b then 1 else 0)
+opToFunction Bigger = Right (\a b -> if a < b then 1 else 0)
 opToFunction Equal = Right (\a b -> if a == b then 1 else 0)
 opToFunction Fact = Left factOp
 
