@@ -26,7 +26,7 @@ module Vm (
 import Data.Maybe (mapMaybe)
 
 data Value = VInt Int | VBool Bool | VOp Op | VFunc [Instruction] deriving (Show, Eq)
-data Op = Add | Sub | Mul | Div | Less | Bigger | Fact | Succ | Equal deriving (Show, Eq)
+data Op = Add | Sub | Mul | Div | Less | Bigger | Fact | Equal deriving (Show, Eq)
 data Instruction = Push Value | Pop | Call | Ret | JumpIfFalse Int | PushArg Int | PushEnv String | Define deriving (Show, Eq)
 type Stack = [Value]
 type Env = [(String, Value)]
@@ -146,11 +146,11 @@ createEnv instructions stack = go instructions stack []
   where
     go :: [Instruction] -> Stack -> Env -> Env
     go [] _ env = env
-    go (Define : PushEnv var : Push value : rest) stack env =
+    go (Define : PushEnv var : Push value : rest) _ env =
         go rest stack ((var, value) : env)
-    go (PushEnv name : PushEnv var : x : y : z : j : rest) stack env =
+    go (PushEnv name : PushEnv var : x : y : z : j : rest) _ env =
         go rest stack ((name, VFunc [x, y, z, j]) : (var, (head (if null stack then [VInt 0] else stack))) : env)
-    go (_ : rest) stack env = go rest stack env
+    go (_ : rest) _ env = go rest stack env
 
 astToInstructions :: Ast -> [Instruction]
 astToInstructions (AstInteger n) = [Push (VInt n)]
@@ -170,6 +170,8 @@ astToInstructions (AstCall [AstSymbol "define", AstCall [AstSymbol func, AstSymb
     [Define] ++ [PushEnv func] ++ PushEnv var : astToInstructions rest
 astToInstructions (AstCall [name, arg1, arg2]) =
     astToInstructions arg1 ++ astToInstructions arg2 ++ astToInstructions name ++ [Call]
+astToInstructions (AstCall [AstSymbol "fact", arg1]) =
+    astToInstructions arg1 ++ astToInstructions (AstSymbol "fact") ++ [Call]
 astToInstructions (AstCall [AstSymbol name, arg1]) =
     astToInstructions arg1 ++ [PushEnv name]
 astToInstructions (AstCall astList) = concatMap astToInstructions astList

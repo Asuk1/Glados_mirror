@@ -73,6 +73,28 @@ Le but étant de transformer notre lisp en nouveau langage et de créer une VM p
 - [x] Compiler Vm
 - [x] Executer Vm
 
+## BNF du nouveau langage ##
+
+Our Bnf Language Grammar
+
+s_expression = atomic_symbol \
+               / "(" s_expression "."s_expression ")" \
+               / list
+
+list = s_expression < s_expression > ";"
+
+atomic_symbol = letter atom_part
+
+atom_part = empty / letter atom_part / number atom_part
+
+\<op> ::= "Add" | "Sub" | "Mul" | "Div" | "Less" | "Bigger" | "Fact" | "Equal "
+
+letter = "a" / "b" / " ..." / "z"
+
+number = "1" / "2" / " ..." / "9"
+
+empty = " "
+
 ## USAGE ##
 
 ./glados < \<file>
